@@ -1,0 +1,284 @@
+"use client";
+
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+import {
+  Info,
+  Calendar,
+  AlertOctagon,
+  Eye,
+  Loader2,
+  ArrowLeft,
+  LayoutGrid,
+  List as ListIcon,
+} from "lucide-react";
+
+interface Report {
+  id: string;
+  imageUrl?: string;
+  condition: string;
+  confidence: number;
+  description: string;
+  timestamp: string;
+  issues?: string[];
+  provider?: string;
+  comment?: string;
+}
+
+export default function UserReportsPage() {
+  const { user, loading: authLoading } = useAuth();
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      if (!user?.uid) return;
+
+      try {
+        const response = await fetch(`/api/reports/user?userId=${user.uid}`);
+        const data = await response.json();
+
+        if (data.success) {
+          setReports(data.reports);
+        } else {
+          throw new Error(data.error || "Failed to fetch reports");
+        }
+      } catch (err: any) {
+        console.error("Error loading history:", err);
+        setError("Could not load your history. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!authLoading) {
+      if (user) {
+        fetchReports();
+      } else {
+        setLoading(false);
+      }
+    }
+  }, [user, authLoading]);
+
+  const getConditionColor = (condition: string) => {
+    switch (condition?.toLowerCase()) {
+      case "excellent":
+      case "good":
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800";
+      case "fair":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800";
+      case "poor":
+        return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800";
+      case "critical":
+        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
+    }
+  };
+
+  if (authLoading || (loading && user)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-black p-6 text-center">
+        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+          <Info className="text-gray-400" />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Login Required
+        </h1>
+        <p className="text-gray-500 mb-6">
+          Please sign in to view your scan history.
+        </p>
+        <Link
+          href="/"
+          className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium"
+        >
+          Return Home
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-black pb-24">
+      <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+        {/* Header */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Link
+                href="/"
+                className="p-2 -ml-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors"
+              >
+                <ArrowLeft
+                  size={20}
+                  className="text-gray-600 dark:text-gray-400"
+                />
+              </Link>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                My Scans
+              </h1>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 text-sm ml-9">
+              {reports.length} report{reports.length !== 1 && "s"} found
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 p-1 rounded-lg border border-gray-200 dark:border-gray-800 w-fit ml-9 md:ml-0">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 rounded-md transition-all ${
+                viewMode === "grid"
+                  ? "bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-sm"
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              }`}
+            >
+              <LayoutGrid size={18} />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 rounded-md transition-all ${
+                viewMode === "list"
+                  ? "bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-sm"
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              }`}
+            >
+              <ListIcon size={18} />
+            </button>
+          </div>
+        </header>
+
+        {/* Content */}
+        {error ? (
+          <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-xl text-red-600 dark:text-red-400 text-sm border border-red-100 dark:border-red-900/20">
+            {error}
+          </div>
+        ) : reports.length === 0 ? (
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-12 text-center border border-gray-100 dark:border-gray-800">
+            <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              No history yet
+            </h3>
+            <p className="text-gray-500 mt-2 max-w-sm mx-auto mb-6">
+              Your scan history will appear here. Start by analyzing a heritage
+              site.
+            </p>
+            <Link
+              href="/scan"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/20"
+            >
+              Start Scanning
+            </Link>
+          </div>
+        ) : (
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                : "space-y-3"
+            }
+          >
+            {reports.map((report) => (
+              <Link
+                key={report.id}
+                href={`/reports/${report.id}`} // We'll create this route next
+                className={`group bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-orange-500 dark:hover:border-orange-500 transition-all shadow-sm hover:shadow-md flex ${
+                  viewMode === "list"
+                    ? "flex-row items-center p-3 gap-4"
+                    : "flex-col"
+                }`}
+              >
+                {/* Thumbnail */}
+                <div
+                  className={`relative bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 ${
+                    viewMode === "list"
+                      ? "w-20 h-20 rounded-lg"
+                      : "w-full aspect-video"
+                  }`}
+                >
+                  {report.imageUrl ? (
+                    <img
+                      src={report.imageUrl}
+                      alt="Scan"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <AlertOctagon size={24} />
+                    </div>
+                  )}
+                  {viewMode === "grid" && (
+                    <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
+                      <Calendar size={10} />
+                      {formatDistanceToNow(new Date(report.timestamp), {
+                        addSuffix: true,
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div
+                  className={`flex-1 min-w-0 ${viewMode === "grid" ? "p-4" : ""}`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${getConditionColor(report.condition)}`}
+                    >
+                      {report.condition}
+                    </span>
+                    {viewMode === "list" && (
+                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <Calendar size={12} />
+                        {formatDistanceToNow(new Date(report.timestamp), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-gray-900 dark:text-white font-medium line-clamp-1 mb-1 text-sm md:text-base">
+                    {report.comment || report.description || "Untitled Scan"}
+                  </h3>
+
+                  {report.comment && (
+                    <p className="text-xs text-gray-400 line-clamp-1 mb-2">
+                      {report.description}
+                    </p>
+                  )}
+
+                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-auto pt-2">
+                    <span>
+                      {(report.confidence * 100).toFixed(0)}% confidence
+                    </span>
+                    <span>•</span>
+                    <span className="uppercase">{report.provider || "AI"}</span>
+                  </div>
+                </div>
+
+                {viewMode === "list" && (
+                  <div className="pr-4 text-gray-400 group-hover:text-orange-500">
+                    <Eye size={20} />
+                  </div>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
