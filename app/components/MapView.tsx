@@ -109,10 +109,10 @@ export default function MapView({
           >
             <Popup>
               <div className="text-sm">
-                <h3 className="font-semibold">{site.name}</h3>
-                <p className="text-zinc-600 text-xs">{site.address}</p>
+                <h3 className="font-semibold" style={{ color: 'var(--color-forest)' }}>{site.name}</h3>
+                <p className="text-xs" style={{ color: 'var(--color-forest-dark)', opacity: 0.7 }}>{site.address}</p>
                 {site.rating && (
-                  <p className="text-xs mt-1">⭐ {site.rating.toFixed(1)}</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--color-terracotta)' }}>⭐ {site.rating.toFixed(1)}</p>
                 )}
               </div>
             </Popup>
@@ -122,7 +122,7 @@ export default function MapView({
 
       {/* Map controls overlay */}
       <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg px-4 py-2 z-1000">
-        <p className="text-sm font-medium text-zinc-900">
+        <p className="text-sm font-medium" style={{ color: 'var(--color-forest)' }}>
           {sites.length} heritage {sites.length === 1 ? "site" : "sites"} nearby
         </p>
       </div>

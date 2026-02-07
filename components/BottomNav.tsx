@@ -21,39 +21,49 @@ export function BottomNav() {
   return (
     <div className="fixed bottom-0 left-0 right-0 flex justify-center z-40 pointer-events-none pb-safe">
       <div className="w-full max-w-md pointer-events-auto">
-        {/* Glassmorphism Nav Container */}
-        <div className="mx-4 mb-4 bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-visible">
-          <div className="flex items-center justify-around px-2 py-3 relative">
+        {/* Clean White Nav Container with subtle shadow */}
+        <div className="mx-4 mb-4 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-visible">
+          <div className="flex items-center justify-around px-3 py-3 relative">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
 
               if (item.isCenter) {
-                // Center Scan Button
+                // Center Scan Button - Premium Style
                 return (
                   <Link key={item.path} href={item.path} className="relative">
                     <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="relative -mt-8"
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.92 }}
+                      className="relative -mt-5"
                     >
-                      {/* Glow effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl blur-xl opacity-50"></div>
-
-                      {/* Main button */}
-                      <div className="relative w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl shadow-xl flex items-center justify-center border-4 border-white">
+                      {/* Main button with gradient background */}
+                      <motion.div
+                        animate={{
+                          boxShadow: active
+                            ? "0 12px 24px rgba(4, 120, 87, 0.25)"
+                            : "0 8px 16px rgba(4, 120, 87, 0.15)",
+                        }}
+                        className="relative w-14 h-14 rounded-xl shadow-lg flex items-center justify-center border border-emerald-600/20 transition-all"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #059669 0%, #10B981 100%)",
+                        }}
+                      >
                         <Icon
-                          size={28}
+                          size={24}
                           className="text-white"
-                          strokeWidth={2.5}
+                          strokeWidth={2.2}
                         />
-                      </div>
+                      </motion.div>
 
-                      {/* Active indicator dot */}
+                      {/* Active indicator */}
                       {active && (
                         <motion.div
                           layoutId="centerIndicator"
-                          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-orange-500 rounded-full"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-emerald-600 rounded-full"
                         />
                       )}
                     </motion.div>
@@ -67,37 +77,49 @@ export function BottomNav() {
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex flex-col items-center gap-1 py-2 relative"
+                    className="flex flex-col items-center gap-1.5 py-2.5 relative cursor-pointer"
                   >
-                    <div
-                      className={`relative transition-colors ${
-                        active ? "text-green-600" : "text-gray-400"
-                      }`}
+                    {/* Icon with smooth transition */}
+                    <motion.div
+                      animate={{
+                        color: active ? "#047857" : "#D1D5DB",
+                      }}
+                      transition={{ duration: 0.2 }}
+                      className="relative"
                     >
-                      <Icon size={24} strokeWidth={active ? 2.5 : 2} />
+                      <Icon
+                        size={22}
+                        strokeWidth={active ? 2.2 : 1.8}
+                        className="transition-all"
+                      />
 
-                      {/* Active background glow */}
+                      {/* Subtle background glow on active */}
                       {active && (
                         <motion.div
                           layoutId="activeGlow"
-                          className="absolute inset-0 -z-10 bg-green-100 rounded-xl blur-sm scale-150"
+                          className="absolute inset-0 -z-10 bg-emerald-100 rounded-lg blur-md scale-125 opacity-0 group-hover:opacity-100"
                         />
                       )}
-                    </div>
+                    </motion.div>
 
-                    <span
-                      className={`text-xs font-medium transition-colors ${
-                        active ? "text-green-600" : "text-gray-500"
-                      }`}
+                    {/* Label with smooth color transition */}
+                    <motion.span
+                      animate={{
+                        color: active ? "#047857" : "#9CA3AF",
+                      }}
+                      transition={{ duration: 0.2 }}
+                      className="text-xs font-semibold tracking-wide"
                     >
                       {item.label}
-                    </span>
+                    </motion.span>
 
-                    {/* Active indicator */}
+                    {/* Active indicator line */}
                     {active && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute -bottom-1 w-1 h-1 bg-green-600 rounded-full"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        className="absolute -bottom-0.5 w-1.5 h-1 bg-emerald-600 rounded-full origin-center"
                       />
                     )}
                   </motion.div>

@@ -118,13 +118,16 @@ export default function MapPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-eggshell)' }}>
       {/* Header */}
       <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-zinc-900">Heritage Map</h1>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--color-forest)' }}>Heritage Map</h1>
         <button
           onClick={() => router.push("/")}
-          className="text-sm text-zinc-600 hover:text-zinc-900"
+          className="text-sm transition-colors"
+          style={{ color: 'var(--color-forest-dark)' }}
+          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-forest)'}
+          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-forest-dark)'}
         >
           ← Home
         </button>
@@ -143,7 +146,7 @@ export default function MapPage() {
         {/* Loading indicator */}
         {loading && (
           <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg">
-            <p className="text-sm text-zinc-600">Loading sites...</p>
+            <p className="text-sm" style={{ color: 'var(--color-forest)' }}>Loading sites...</p>
           </div>
         )}
 
