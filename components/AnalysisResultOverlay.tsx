@@ -9,6 +9,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { AnalysisResult } from "@/lib/ai/types";
+import { LocationCapture } from "./LocationCapture";
 
 interface Props {
   result: AnalysisResult;
@@ -30,6 +31,11 @@ export function AnalysisResultOverlay({
   const [comment, setComment] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSaved, setIsSaved] = React.useState(false);
+  const [location, setLocation] = React.useState<{
+    latitude: number;
+    longitude: number;
+    address?: string;
+  } | null>(null);
 
   // Determine color based on condition
   const getConditionColor = (condition: string) => {
@@ -83,6 +89,7 @@ export function AnalysisResultOverlay({
           comment,
           userId,
           userEmail,
+          location, // Include location data
         }),
       });
 
@@ -212,6 +219,22 @@ export function AnalysisResultOverlay({
 
         {/* Comment & Submit Section */}
         <div className="pt-6 border-t border-gray-100 dark:border-gray-800 space-y-4">
+          {/* Location Capture */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Location
+            </label>
+            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+              <LocationCapture
+                autoCapture={true}
+                onLocationCaptured={setLocation}
+                onError={(error) =>
+                  console.warn("Location capture failed:", error)
+                }
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Add Inspector's Note

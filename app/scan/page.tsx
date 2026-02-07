@@ -3,14 +3,23 @@
 import { MobileFrame } from "@/components/MobileFrame";
 import { BottomNav } from "@/components/BottomNav";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Zap, AlertCircle, RotateCcw, Sparkles } from "lucide-react";
+import {
+  Camera,
+  Zap,
+  AlertCircle,
+  RotateCcw,
+  Sparkles,
+  MapPin,
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnalysisResultOverlay } from "@/components/AnalysisResultOverlay";
 import { AnalysisResult } from "@/lib/ai/types";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function ScanPage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
@@ -24,9 +33,32 @@ export default function ScanPage() {
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [provider, setProvider] = useState<string | undefined>(undefined);
   const [showResult, setShowResult] = useState(false);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    address?: string;
+    name?: string; // Heritage site name
+  } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Check for heritage site location from URL parameters
+  useEffect(() => {
+    const lat = searchParams.get("lat");
+    const lng = searchParams.get("lng");
+    const name = searchParams.get("name");
+    const address = searchParams.get("address");
+
+    if (lat && lng) {
+      setLocation({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
+        address: address || undefined,
+        name: name || undefined,
+      });
+    }
+  }, [searchParams]);
 
   // Initialize camera
   useEffect(() => {
@@ -62,7 +94,7 @@ export default function ScanPage() {
   }, []);
 
   // Capture photo from video stream
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -80,6 +112,41 @@ export default function ScanPage() {
         const photoData = canvas.toDataURL("image/jpeg", 0.9);
         setCapturedPhoto(photoData);
         setError(null); // Clear any previous errors
+
+        // Capture location for AI context (non-blocking)
+        // Only if location is not already set from URL params (heritage site)
+        if (!location) {
+          try {
+            const position = await navigator.geolocation.getCurrentPosition(
+              async (pos) => {
+                const { latitude, longitude } = pos.coords;
+
+                // Try reverse geocoding
+                try {
+                  const response = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18`,
+                    { headers: { "User-Agent": "EcoLens Heritage App" } },
+                  );
+                  const data = await response.json();
+                  setLocation({
+                    latitude,
+                    longitude,
+                    address: data.display_name || undefined,
+                  });
+                } catch {
+                  setLocation({ latitude, longitude });
+                }
+              },
+              (err) => {
+                console.warn("Location capture failed:", err);
+                // Continue without location - not critical
+              },
+              { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
+            );
+          } catch (err) {
+            console.warn("Location not available:", err);
+          }
+        }
       }
     }
   };
@@ -107,6 +174,7 @@ export default function ScanPage() {
         },
         body: JSON.stringify({
           imageData: capturedPhoto,
+          location, // Include location for AI context
           // Provider can be set generically or let backend use default
           // provider: "gemini"
         }),
@@ -179,6 +247,29 @@ export default function ScanPage() {
             }`}
           ></motion.div>
         </div>
+
+        {/* Heritage Site Banner */}
+        {location?.name && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-3"
+          >
+            <div className="flex items-center gap-2">
+              <MapPin size={18} className="text-blue-300 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">
+                  {location.name}
+                </p>
+                {location.address && (
+                  <p className="text-xs text-blue-100 truncate">
+                    {location.address}
+                  </p>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
       </motion.header>

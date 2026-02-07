@@ -22,3 +22,9 @@ export interface PlacesSearchParams {
   longitude: number;
   radius?: number; // in meters, default 2000
 }
+
+export interface ReportLocation {
+  latitude: number;
+  longitude: number;
+  address?: string; // Optional human-readable address
+}
