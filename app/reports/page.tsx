@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   LayoutGrid,
   List as ListIcon,
+  MapPin,
 } from "lucide-react";
 
 interface Report {
@@ -25,6 +26,11 @@ interface Report {
   issues?: string[];
   provider?: string;
   comment?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
 }
 
 export default function UserReportsPage() {
@@ -266,6 +272,15 @@ export default function UserReportsPage() {
                     </span>
                     <span>•</span>
                     <span className="uppercase">{report.provider || "AI"}</span>
+                    {report.location && (
+                      <>
+                        <span>•</span>
+                        <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                          <MapPin size={12} />
+                          Location
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 

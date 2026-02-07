@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google"; // Import Poppins
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 const poppins = Poppins({

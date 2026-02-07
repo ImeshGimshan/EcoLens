@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     // Parse request body
     const body = await request.json();
-    const { imageData, provider, prompt } = body;
+    const { imageData, provider, prompt, location } = body;
 
     // Validate image data
     if (!imageData || typeof imageData !== "string") {
@@ -42,10 +42,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Enhance prompt with location context if available
+    let enhancedPrompt = prompt;
+    if (location && location.latitude && location.longitude) {
+      const locationContext = location.address
+        ? `\n\nLocation Context: This heritage site is located at ${location.address} (${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}). Consider the geographic region, climate, and typical architectural styles of this area in your analysis.`
+        : `\n\nLocation Context: This heritage site is located at coordinates ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}. Consider the geographic region and typical architectural styles of this area in your analysis.`;
+
+      enhancedPrompt = (prompt || "") + locationContext;
+    }
+
     // Prepare analysis request
     const analysisRequest: VisionAnalysisRequest = {
       imageData,
-      prompt,
+      prompt: enhancedPrompt,
     };
 
     // Start parallel tasks: AI Analysis & Image Upload

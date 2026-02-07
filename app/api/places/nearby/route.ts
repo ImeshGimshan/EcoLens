@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { HeritageSite } from '@/app/types/heritage';
+import { NextRequest, NextResponse } from "next/server";
+import { HeritageSite } from "@/app/types/heritage";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const latitude = searchParams.get('latitude');
-  const longitude = searchParams.get('longitude');
-  const radius = searchParams.get('radius') || '2000'; // Default 2km
+  const latitude = searchParams.get("latitude");
+  const longitude = searchParams.get("longitude");
+  const radius = searchParams.get("radius") || "2000"; // Default 2km
 
   if (!latitude || !longitude) {
     return NextResponse.json(
-      { error: 'Latitude and longitude are required' },
-      { status: 400 }
+      { error: "Latitude and longitude are required" },
+      { status: 400 },
     );
   }
 
@@ -32,13 +32,34 @@ export async function GET(request: NextRequest) {
       out center;
     `;
 
-    const response = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
+    const response = await fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
       body: overpassQuery,
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
     });
+
+    // Check if response is ok
+    if (!response.ok) {
+      console.error(
+        "Overpass API error:",
+        response.status,
+        response.statusText,
+      );
+      return NextResponse.json({ sites: [] });
+    }
+
+    // Check content type to ensure it's JSON
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      console.error(
+        "Overpass API returned non-JSON response:",
+        text.substring(0, 200),
+      );
+      return NextResponse.json({ sites: [] });
+    }
 
     const data = await response.json();
 
@@ -52,7 +73,7 @@ export async function GET(request: NextRequest) {
       .map((element: any) => {
         const lat = element.lat || element.center?.lat;
         const lon = element.lon || element.center?.lon;
-        
+
         if (!lat || !lon) return null;
 
         const types: string[] = [];
@@ -63,7 +84,10 @@ export async function GET(request: NextRequest) {
         return {
           placeId: `osm-${element.type}-${element.id}`,
           name: element.tags.name,
-          address: element.tags['addr:full'] || element.tags['addr:street'] || 'Address not available',
+          address:
+            element.tags["addr:full"] ||
+            element.tags["addr:street"] ||
+            "Address not available",
           latitude: lat,
           longitude: lon,
           types: types,
@@ -76,10 +100,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ sites: heritageSites });
   } catch (error) {
-    console.error('Error fetching places from Overpass API:', error);
+    console.error("Error fetching places from Overpass API:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch nearby places' },
-      { status: 500 }
+      { error: "Failed to fetch nearby places" },
+      { status: 500 },
     );
   }
 }

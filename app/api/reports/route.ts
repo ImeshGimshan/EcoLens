@@ -4,8 +4,16 @@ import { adminDb } from "@/lib/firebase-admin";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { analysis, imageUrl, provider, model, comment, userId, userEmail } =
-      body;
+    const {
+      analysis,
+      imageUrl,
+      provider,
+      model,
+      comment,
+      userId,
+      userEmail,
+      location,
+    } = body;
 
     if (!adminDb) {
       return NextResponse.json(
@@ -34,6 +42,7 @@ export async function POST(request: Request) {
       comment: comment || "", // Save user comment
       userId: userId || null, // Save user ID
       userEmail: userEmail || null, // Save user email
+      location: location || null, // Save location data (latitude, longitude, address)
       timestamp: new Date(), // Server timestamp
       status: "pending",
     });

@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import dynamic from "next/dynamic";
 import {
   ArrowLeft,
   Calendar,
@@ -13,7 +14,18 @@ import {
   Layers,
   Loader2,
   Info,
+  MapPin,
 } from "lucide-react";
+
+// Dynamically import MapView to avoid SSR issues with Leaflet
+const MapView = dynamic(() => import("@/app/components/MapView"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
+      <p className="text-gray-500">Loading map...</p>
+    </div>
+  ),
+});
 
 interface Report {
   id: string;
@@ -27,6 +39,11 @@ interface Report {
   provider?: string;
   model?: string;
   comment?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
 }
 
 export default function UserReportDetailPage({
@@ -244,6 +261,52 @@ export default function UserReportDetailPage({
             )}
           </div>
         </div>
+
+        {/* Location Section */}
+        {report.location && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <MapPin size={18} />
+              Scan Location
+            </h2>
+
+            {/* Map Display */}
+            <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 h-64">
+              <MapView
+                userLocation={{
+                  latitude: report.location.latitude,
+                  longitude: report.location.longitude,
+                  accuracy: 0,
+                }}
+                sites={[]}
+                selectedSite={null}
+                onSiteSelect={() => {}}
+              />
+            </div>
+
+            {/* Address Display */}
+            {report.location.address && (
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800">
+                <p className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                  <MapPin size={16} className="mt-0.5 shrink-0" />
+                  <span>{report.location.address}</span>
+                </p>
+              </div>
+            )}
+
+            {/* Coordinates */}
+            <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-100 dark:border-gray-800">
+                <span className="font-medium">Latitude:</span>{" "}
+                {report.location.latitude.toFixed(6)}
+              </div>
+              <div className="flex-1 bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-100 dark:border-gray-800">
+                <span className="font-medium">Longitude:</span>{" "}
+                {report.location.longitude.toFixed(6)}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
