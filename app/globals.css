@@ -2,26 +2,71 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f0ead6; /* Eggshell */
+  --foreground: #228b22; /* Forest Green */
+  --color-forest: #228b22;
+  --color-forest-dark: #1a6b1a;
+  --color-forest-light: #2ea82e;
+  --color-eggshell: #f0ead6;
+  --color-terracotta: #e2725b;
+  --color-terracotta-dark: #c85a42;
+  --gradient-primary: linear-gradient(135deg, #228b22 0%, #2ea82e 100%);
+  --gradient-accent: linear-gradient(135deg, #e2725b 0%, #f08a73 100%);
+  --gradient-hero: linear-gradient(
+    180deg,
+    rgba(34, 139, 34, 0.95) 0%,
+    rgba(46, 168, 46, 0.85) 100%
+  );
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(34, 139, 34, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(34, 139, 34, 0.6);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
   }
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
+  background: linear-gradient(135deg, #f0ead6 0%, #e8dfc8 100%);
+  font-family: var(--font-poppins), sans-serif;
+  overscroll-behavior: none;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
   font-family: Arial, Helvetica, sans-serif;
 }
