@@ -49,20 +49,26 @@ interface Report {
 export default function UserReportDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { user, loading: authLoading } = useAuth();
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reportId, setReportId] = useState<string | null>(null);
+
+  // Extract id from params Promise
+  useEffect(() => {
+    params.then((p) => setReportId(p.id));
+  }, [params]);
 
   useEffect(() => {
     const fetchReport = async () => {
-      if (!user?.uid) return;
+      if (!user?.uid || !reportId) return;
 
       try {
         const response = await fetch(
-          `/api/reports/${params.id}?userId=${user.uid}`,
+          `/api/reports/${reportId}?userId=${user.uid}`,
         );
         const data = await response.json();
 
@@ -80,13 +86,13 @@ export default function UserReportDetailPage({
     };
 
     if (!authLoading) {
-      if (user) {
+      if (user && reportId) {
         fetchReport();
       } else {
-        setLoading(false); // Not logged in
+        setLoading(false); // Not logged in or no reportId yet
       }
     }
-  }, [user, authLoading, params.id]);
+  }, [user, authLoading, reportId]);
 
   const getConditionColor = (condition: string) => {
     switch (condition?.toLowerCase()) {

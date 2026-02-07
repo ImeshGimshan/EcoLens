@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { AnalysisResult } from "@/lib/ai/types";
 import { LocationCapture } from "./LocationCapture";
+import { RejectionOverlay } from "./RejectionOverlay";
 
 interface Props {
   result: AnalysisResult;
@@ -28,6 +29,16 @@ export function AnalysisResultOverlay({
   userEmail,
   onClose,
 }: Props) {
+  // Check if image was rejected as not relevant
+  // Default to true for backward compatibility with old reports
+  if (result.isRelevant === false) {
+    return (
+      <RejectionOverlay reason={result.rejectionReason} onRetake={onClose} />
+    );
+  }
+
+  // Continue with normal analysis display for relevant images
+
   const [comment, setComment] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSaved, setIsSaved] = React.useState(false);
