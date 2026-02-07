@@ -29,6 +29,10 @@ export type HeritageCondition =
  * Structured analysis result from AI provider
  */
 export interface AnalysisResult {
+  /** Whether the image contains heritage-related content (optional for backward compatibility) */
+  isRelevant?: boolean;
+  /** Reason for rejection if not relevant */
+  rejectionReason?: string;
   /** Overall condition assessment */
   condition: HeritageCondition;
   /** Confidence score (0-1) */
@@ -126,9 +130,17 @@ export class VisionProviderError extends Error {
 /**
  * Default prompt for heritage site analysis
  */
-export const DEFAULT_HERITAGE_PROMPT = `Analyze this image of a heritage site or historical structure for signs of damage or deterioration.
+export const DEFAULT_HERITAGE_PROMPT = `Analyze this image to determine if it contains a heritage site, historical structure, or architectural element worth documenting.
 
-Please assess the following:
+FIRST, determine if this image is relevant for heritage documentation:
+- Does it show a building, monument, temple, historical structure, or architectural element?
+- Is it a heritage site, historical building, or culturally significant structure?
+- Is the image clear enough to assess condition?
+- Is the main subject a structure (not just people, random objects, or nature)?
+
+If the image does NOT show heritage-related content (e.g., random objects, people without structures, nature scenes, unclear/blurry photos, food, animals, etc.), set "isRelevant" to false and provide a brief, friendly rejection reason.
+
+If relevant, assess the following:
 1. Overall structural condition
 2. Signs of decay (cracks, erosion, weathering)
 3. Graffiti or vandalism
@@ -137,6 +149,8 @@ Please assess the following:
 
 Provide your response in the following JSON format:
 {
+  "isRelevant": true or false,
+  "rejectionReason": "brief friendly reason if not relevant (e.g., 'This image appears to show [X] rather than a heritage site or structure')",
   "condition": "excellent" | "good" | "fair" | "poor" | "critical",
   "confidence": 0.0 to 1.0,
   "issues": ["list of identified issues"],
@@ -144,4 +158,5 @@ Provide your response in the following JSON format:
   "description": "detailed description of findings"
 }
 
-Be specific and actionable in your recommendations.`;
+If isRelevant is false, you can set condition to "good" and provide minimal details for other fields.
+Be specific and actionable in your recommendations when the image is relevant.`;

@@ -172,11 +172,12 @@ export class GeminiVisionProvider implements IVisionProvider {
   private createFallbackAnalysis(text: string): AnalysisResult {
     // Create a basic analysis when JSON parsing fails
     return {
+      isRelevant: true, // Assume relevant if we can't parse properly
       condition: "fair",
       confidence: 0.5,
       issues: ["Unable to parse detailed analysis"],
-      recommendations: ["Manual review recommended"],
-      description: text.substring(0, 500), // Truncate long responses
+      recommendations: ["Manual inspection recommended"],
+      description: text || "Analysis completed but details unavailable",
     };
   }
 }
