@@ -72,10 +72,10 @@ export default function LocationPermission({
 
     if (permissionState === 'loading') {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-zinc-50">
+            <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--color-eggshell)' }}>
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-                    <p className="text-zinc-600">Getting your location...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: 'var(--color-forest)' }}></div>
+                    <p style={{ color: 'var(--color-forest-dark)' }}>Getting your location...</p>
                 </div>
             </div>
         );
@@ -83,19 +83,19 @@ export default function LocationPermission({
 
     if (permissionState === 'denied') {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-zinc-50 p-4">
+            <div className="flex items-center justify-center min-h-screen p-4" style={{ background: 'var(--color-eggshell)' }}>
                 <div className="max-w-md text-center">
                     <div className="text-6xl mb-4">📍</div>
-                    <h2 className="text-2xl font-bold text-zinc-900 mb-2">
+                    <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-forest)' }}>
                         Location Access Required
                     </h2>
-                    <p className="text-zinc-600 mb-6">
+                    <p className="mb-6" style={{ color: 'var(--color-forest-dark)' }}>
                         {error ||
                             'EcoLens needs access to your location to show nearby heritage sites.'}
                     </p>
-                    <div className="bg-zinc-100 rounded-lg p-4 text-sm text-left mb-6">
-                        <p className="font-semibold mb-2">To enable location:</p>
-                        <ol className="list-decimal list-inside space-y-1 text-zinc-700">
+                    <div className="rounded-lg p-4 text-sm text-left mb-6" style={{ background: 'var(--color-eggshell-dark)' }}>
+                        <p className="font-semibold mb-2" style={{ color: 'var(--color-forest)' }}>To enable location:</p>
+                        <ol className="list-decimal list-inside space-y-1" style={{ color: 'var(--color-forest-dark)' }}>
                             <li>Click the lock icon in your browser&apos;s address bar</li>
                             <li>Find &quot;Location&quot; permissions</li>
                             <li>Select &quot;Allow&quot;</li>
@@ -104,7 +104,10 @@ export default function LocationPermission({
                     </div>
                     <button
                         onClick={() => window.location.reload()}
-                        className="bg-green-600 text-white px-6 py-3 rounded-full font-medium hover:bg-green-700 transition-colors"
+                        className="text-white px-6 py-3 rounded-full font-medium transition-colors"
+                        style={{ background: 'var(--color-forest)' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-forest-dark)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-forest)'}
                     >
                         Refresh Page
                     </button>
@@ -115,18 +118,21 @@ export default function LocationPermission({
 
     if (permissionState === 'prompt') {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-zinc-50 p-4">
+            <div className="flex items-center justify-center min-h-screen p-4" style={{ background: 'var(--color-eggshell)' }}>
                 <div className="max-w-md text-center">
                     <div className="text-6xl mb-4">🗺️</div>
-                    <h2 className="text-2xl font-bold text-zinc-900 mb-2">
+                    <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-forest)' }}>
                         Discover Heritage Sites
                     </h2>
-                    <p className="text-zinc-600 mb-6">
+                    <p className="mb-6" style={{ color: 'var(--color-forest-dark)' }}>
                         Allow location access to find cultural and heritage sites near you.
                     </p>
                     <button
                         onClick={requestPermission}
-                        className="bg-green-600 text-white px-8 py-3 rounded-full font-medium hover:bg-green-700 transition-colors"
+                        className="text-white px-8 py-3 rounded-full font-medium transition-colors"
+                        style={{ background: 'var(--color-forest)' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-forest-dark)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-forest)'}
                     >
                         Enable Location
                     </button>

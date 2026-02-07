@@ -37,68 +37,66 @@ export function AppHeader({
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="relative px-6 pt-6 pb-4 bg-gradient-to-br from-green-500 via-green-600 to-emerald-700 text-white z-50"
+      className="relative px-8 py-4 border-b border-gray-100 z-50 bg-white"
     >
-      {/* Animated background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, white 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        ></div>
-      </div>
-
       {/* Content */}
-      <div className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        {/* Left Section - Title and Icon */}
+        <div className="flex items-center gap-4">
           {icon && (
             <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl shadow-lg"
+              animate={{ rotate: [0, 2, -2, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-gray-100 text-gray-700"
             >
               {icon}
             </motion.div>
           )}
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+              {title}
+            </h1>
             {subtitle && (
-              <p className="text-sm opacity-90 font-medium">{subtitle}</p>
+              <p className="text-sm text-gray-500 font-regular mt-0.5">
+                {subtitle}
+              </p>
             )}
           </div>
         </div>
 
+        {/* Right Section - Actions */}
         {showActions && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Notification Bell */}
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors duration-200"
             >
-              <Bell size={20} strokeWidth={2} />
+              <Bell size={19} strokeWidth={1.8} />
             </motion.button>
 
             {user ? (
               <div className="relative">
+                {/* User Avatar Button */}
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl overflow-hidden hover:bg-white/30 transition-colors border-2 border-white/30"
+                  className="w-9 h-9 rounded-lg overflow-hidden hover:ring-2 hover:ring-gray-200 transition-all duration-200"
                 >
                   {user.photoURL ? (
                     <Image
                       src={user.photoURL}
                       alt={user.displayName || "User"}
-                      width={40}
-                      height={40}
+                      width={36}
+                      height={36}
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User size={20} strokeWidth={2} />
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <User size={18} strokeWidth={2} className="text-gray-600" />
+                    </div>
                   )}
                 </motion.button>
 
@@ -106,37 +104,37 @@ export function AppHeader({
                 <AnimatePresence>
                   {showUserMenu && (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      initial={{ opacity: 0, scale: 0.92, y: -8 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 z-[9999]"
+                      exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden z-9999"
                     >
-                      {/* User Info */}
-                      <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-b border-gray-100">
+                      {/* User Info Section */}
+                      <div className="p-4 border-b border-gray-100">
                         <div className="flex items-center gap-3">
                           {user.photoURL ? (
                             <Image
                               src={user.photoURL}
                               alt={user.displayName || "User"}
-                              width={48}
-                              height={48}
-                              className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-md"
+                              width={44}
+                              height={44}
+                              className="w-11 h-11 rounded-lg object-cover"
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center">
+                            <div className="w-11 h-11 rounded-lg bg-gray-200 flex items-center justify-center">
                               <User
-                                size={24}
-                                className="text-white"
-                                strokeWidth={2}
+                                size={22}
+                                className="text-gray-600"
+                                strokeWidth={1.8}
                               />
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-800 truncate">
+                            <p className="font-medium text-gray-900 text-sm truncate">
                               {user.displayName || "User"}
                             </p>
-                            <p className="text-xs text-gray-600 truncate">
+                            <p className="text-xs text-gray-500 truncate">
                               {user.email}
                             </p>
                           </div>
@@ -146,31 +144,29 @@ export function AppHeader({
                       {/* Sign Out Button */}
                       <button
                         onClick={handleSignOut}
-                        className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-50 transition-colors text-gray-700"
+                        className="w-full px-4 py-3 flex items-center gap-3 text-left text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
                       >
-                        <LogOut size={20} strokeWidth={2} />
-                        <span className="font-medium">Sign Out</span>
+                        <LogOut size={18} strokeWidth={1.8} />
+                        <span>Sign Out</span>
                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ) : (
+              /* Login Button for Non-Authenticated Users */
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => router.push("/login")}
-                className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-colors"
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors duration-200"
               >
-                <User size={20} strokeWidth={2} />
+                <User size={19} strokeWidth={1.8} />
               </motion.button>
             )}
           </div>
         )}
       </div>
-
-      {/* Decorative gradient orb */}
-      <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
     </motion.header>
   );
 }

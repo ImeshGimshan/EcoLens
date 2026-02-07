@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Sparkles,
   MapPin,
+  CrosshairIcon,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -37,7 +38,7 @@ export default function ScanPage() {
     latitude: number;
     longitude: number;
     address?: string;
-    name?: string; // Heritage site name
+    name?: string;
   } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -65,7 +66,7 @@ export default function ScanPage() {
     const initCamera = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" }, // Use back camera on mobile
+          video: { facingMode: "environment" },
           audio: false,
         });
 
@@ -85,7 +86,6 @@ export default function ScanPage() {
 
     initCamera();
 
-    // Cleanup: stop camera when component unmounts
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -99,29 +99,23 @@ export default function ScanPage() {
       const video = videoRef.current;
       const canvas = canvasRef.current;
 
-      // Set canvas dimensions to match video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
-      // Draw current video frame to canvas
       const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Convert canvas to base64 image
         const photoData = canvas.toDataURL("image/jpeg", 0.9);
         setCapturedPhoto(photoData);
-        setError(null); // Clear any previous errors
+        setError(null);
 
-        // Capture location for AI context (non-blocking)
-        // Only if location is not already set from URL params (heritage site)
         if (!location) {
           try {
             const position = await navigator.geolocation.getCurrentPosition(
               async (pos) => {
                 const { latitude, longitude } = pos.coords;
 
-                // Try reverse geocoding
                 try {
                   const response = await fetch(
                     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18`,
@@ -139,7 +133,6 @@ export default function ScanPage() {
               },
               (err) => {
                 console.warn("Location capture failed:", err);
-                // Continue without location - not critical
               },
               { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
             );
@@ -174,9 +167,7 @@ export default function ScanPage() {
         },
         body: JSON.stringify({
           imageData: capturedPhoto,
-          location, // Include location for AI context
-          // Provider can be set generically or let backend use default
-          // provider: "gemini"
+          location,
         }),
       });
 
@@ -205,88 +196,116 @@ export default function ScanPage() {
 
   return (
     <MobileFrame>
-      {/* Custom Header for Scan Page */}
+      {/* Premium Header */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="relative px-6 pt-6 pb-4 bg-gradient-to-br from-orange-500 via-red-500 to-red-600 text-white overflow-hidden"
+        transition={{ duration: 0.6 }}
+        className="relative px-6 pt-4 pb-3 text-white overflow-hidden"
+        style={{ background: "var(--gradient-hero)" }}
       >
-        <div className="absolute inset-0 opacity-10">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 opacity-20">
           <div
-            className="absolute inset-0"
+            className="absolute -top-20 -right-20 w-48 h-48 rounded-full"
             style={{
-              backgroundImage:
-                "radial-gradient(circle, white 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
+              background:
+                "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
+            }}
+          ></div>
+          <div
+            className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)",
             }}
           ></div>
         </div>
 
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg"
-            >
-              <Camera size={24} strokeWidth={2.5} />
-            </motion.div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">AI Scanner</h1>
-              <p className="text-sm opacity-90 font-medium">
-                Heritage Analysis
-              </p>
-            </div>
-          </div>
+        <div className="relative z-10">
+          {/* Title Section */}
+          <h1 className="text-xl font-bold tracking-tight mb-1">
+            Scan Heritage
+          </h1>
+          <p className="text-white/80 text-xs font-medium">
+            AI-powered conservation analysis
+          </p>
 
-          <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className={`w-2 h-2 rounded-full shadow-lg ${
-              isCameraReady ? "bg-green-400" : "bg-yellow-400"
-            }`}
-          ></motion.div>
+          {/* Status Indicator */}
+          {isCameraReady && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mt-1 inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-medium"
+              style={{
+                background: "rgba(16, 185, 129, 0.2)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
+              }}
+            >
+              <motion.div
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-1.5 h-1.5 rounded-full bg-green-400"
+              ></motion.div>
+              <span style={{ color: "#10B981" }}>Camera Ready</span>
+            </motion.div>
+          )}
         </div>
 
-        {/* Heritage Site Banner */}
-        {location?.name && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-3"
-          >
-            <div className="flex items-center gap-2">
-              <MapPin size={18} className="text-blue-300 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  {location.name}
-                </p>
-                {location.address && (
-                  <p className="text-xs text-blue-100 truncate">
-                    {location.address}
+        {/* Heritage Site Info Banner */}
+        <AnimatePresence>
+          {location?.name && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mt-1 p-2 rounded-2xl"
+              style={{
+                background: "rgba(4, 120, 87, 0.2)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
+                backdropFilter: "blur(12px)",
+              }}
+            >
+              <div className="flex items-start gap-2">
+                <MapPin
+                  size={16}
+                  className="mt-0.5 shrink-0"
+                  style={{ color: "#6EE7B7" }}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white truncate">
+                    {location.name}
                   </p>
-                )}
+                  {location.address && (
+                    <p
+                      className="text-xs mt-0.5 truncate opacity-75"
+                      style={{ color: "#A7F3D0" }}
+                    >
+                      {location.address}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
-
-        <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.header>
 
-      {/* Camera View */}
-      <main className="flex-1 flex flex-col relative bg-gradient-to-b from-gray-900 to-black">
-        <div className="flex-1 relative overflow-hidden">
+      {/* Camera View Container */}
+      <main className="flex-1 flex flex-col relative overflow-hidden pb-20" style={{ background: "var(--color-eggshell)" }}>
+        {/* Camera/Preview Area */}
+        <div className="flex-1 relative overflow-hidden" style={{ background: "#0F172A" }}>
           {/* Video Feed or Captured Photo */}
           {capturedPhoto ? (
-            // Show captured photo
-            <img
+            <motion.img
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               src={capturedPhoto}
               alt="Captured"
               className="absolute inset-0 w-full h-full object-cover"
             />
           ) : (
-            // Show live video feed
             <video
               ref={videoRef}
               autoPlay
@@ -296,130 +315,256 @@ export default function ScanPage() {
             />
           )}
 
-          {/* Hidden canvas for photo capture */}
+          {/* Hidden Canvas */}
           <canvas ref={canvasRef} className="hidden" />
 
-          {/* Scanning Animation Overlay */}
-          {isAnalyzing && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
+          {/* Analyzing Overlay */}
+          <AnimatePresence>
+            {isAnalyzing && (
               <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.5, 1, 0.5],
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-30 flex flex-col items-center justify-center"
+                style={{
+                  background: "rgba(31, 41, 55, 0.7)",
+                  backdropFilter: "blur(8px)",
                 }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-24 h-24 rounded-full bg-orange-500/20 flex items-center justify-center mb-4"
               >
-                <Sparkles size={48} className="text-orange-400" />
+                <motion.div
+                  animate={{
+                    scale: [1, 1.15, 1],
+                    opacity: [0.6, 1, 0.6],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-24 h-24 rounded-full flex items-center justify-center mb-4 shadow-2xl"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(4, 120, 87, 0.3) 0%, rgba(16, 185, 129, 0.1) 100%)",
+                    border: "2px solid rgba(16, 185, 129, 0.4)",
+                  }}
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles size={40} style={{ color: "#10B981" }} />
+                  </motion.div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-center"
+                >
+                  <p className="text-white font-semibold text-lg mb-2">
+                    Analyzing...
+                  </p>
+                  <p className="text-white/60 text-xs">
+                    Processing heritage data
+                  </p>
+                </motion.div>
               </motion.div>
-              <p className="text-white font-medium animate-pulse">
-                Analyzing Structure...
-              </p>
-            </div>
-          )}
+            )}
+          </AnimatePresence>
 
-          {/* Error Message */}
-          {error && (
-            <div className="absolute inset-x-0 top-4 z-20 flex justify-center px-4">
-              <div className="bg-red-500/90 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 backdrop-blur-sm">
-                <AlertCircle size={16} />
-                <p className="text-sm font-medium">{error}</p>
-                <button onClick={() => setError(null)} className="ml-2">
-                  <RotateCcw size={14} />
-                </button>
+          {/* Error Toast */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="absolute top-4 left-4 right-4 z-40 px-4 py-3 rounded-xl shadow-xl flex items-center gap-3"
+                style={{
+                  background: "rgba(239, 68, 68, 0.9)",
+                  backdropFilter: "blur(12px)",
+                }}
+              >
+                <AlertCircle size={18} className="shrink-0 text-white" />
+                <p className="text-sm font-medium text-white flex-1">{error}</p>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setError(null)}
+                  className="text-white/80 hover:text-white"
+                >
+                  <RotateCcw size={16} />
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Crosshair Scanner Frame */}
+          {!capturedPhoto && isCameraReady && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+              className="absolute inset-0 pointer-events-none p-8 flex items-center justify-center"
+            >
+              {/* Corner Brackets */}
+              <div className="relative w-full h-full max-w-xs max-h-96">
+                <div
+                  className="absolute top-0 left-0 w-12 h-12 border-t-3 border-l-3 rounded-tl-2xl"
+                  style={{ borderColor: "rgba(16, 185, 129, 0.6)" }}
+                ></div>
+                <div
+                  className="absolute top-0 right-0 w-12 h-12 border-t-3 border-r-3 rounded-tr-2xl"
+                  style={{ borderColor: "rgba(16, 185, 129, 0.6)" }}
+                ></div>
+                <div
+                  className="absolute bottom-0 left-0 w-12 h-12 border-b-3 border-l-3 rounded-bl-2xl"
+                  style={{ borderColor: "rgba(16, 185, 129, 0.6)" }}
+                ></div>
+                <div
+                  className="absolute bottom-0 right-0 w-12 h-12 border-b-3 border-r-3 rounded-br-2xl"
+                  style={{ borderColor: "rgba(16, 185, 129, 0.6)" }}
+                ></div>
+
+                {/* Center Crosshair */}
+                <motion.div
+                  animate={{ scale: [0.9, 1.1, 0.9] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <div className="w-1 h-8" style={{ background: "rgba(16, 185, 129, 0.4)" }}></div>
+                  <div className="absolute w-8 h-1" style={{ background: "rgba(16, 185, 129, 0.4)" }}></div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           )}
+        </div>
 
-          {/* Corner Brackets */}
-          <div className="absolute inset-0 p-8 pointer-events-none">
-            <div className="absolute top-8 left-8 w-16 h-16 border-t-4 border-l-4 border-orange-500 rounded-tl-2xl"></div>
-            <div className="absolute top-8 right-8 w-16 h-16 border-t-4 border-r-4 border-orange-500 rounded-tr-2xl"></div>
-            <div className="absolute bottom-24 left-8 w-16 h-16 border-b-4 border-l-4 border-orange-500 rounded-bl-2xl"></div>
-            <div className="absolute bottom-24 right-8 w-16 h-16 border-b-4 border-r-4 border-orange-500 rounded-br-2xl"></div>
-          </div>
-
-          {/* Controls */}
-          <div className="absolute bottom-28 left-0 right-0 flex flex-col items-center gap-4 p-6">
-            {!showResult && (
-              <>
-                {capturedPhoto ? (
-                  // Photo captured - show retake and analyze buttons
-                  <div className="flex gap-3 w-full max-w-sm">
+        {/* Controls Section - Fixed Bottom */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="sticky bottom-0 p-5 pt-6 z-20"
+          style={{
+            background: "var(--color-eggshell)",
+          }}
+        >
+          {!showResult && (
+            <>
+              {capturedPhoto ? (
+                // Captured State - Retake & Analyze
+                <div className="space-y-3">
+                  <div className="flex gap-3">
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={retakePhoto}
                       disabled={isAnalyzing}
-                      className="flex-1 px-6 py-4 bg-white/20 backdrop-blur-md text-white font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2 border border-white/30 disabled:opacity-50"
+                      className="flex-1 px-6 py-3 font-semibold rounded-full text-white shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                      style={{
+                        background: "rgba(16, 185, 129, 0.2)",
+                        border: "1.5px solid rgba(16, 185, 129, 0.4)",
+                      }}
                     >
-                      <RotateCcw size={20} strokeWidth={2.5} />
+                      <RotateCcw size={16} strokeWidth={2.5} />
                       Retake
                     </motion.button>
+
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={analyzePhoto}
                       disabled={isAnalyzing}
-                      className="flex-1 px-6 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="flex-1 px-6 py-3 font-semibold rounded-full text-white shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+                      }}
                     >
                       {isAnalyzing ? (
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        >
+                          <Sparkles size={16} strokeWidth={2.5} />
+                        </motion.div>
                       ) : (
                         <>
-                          <Sparkles size={20} strokeWidth={2.5} />
+                          <Zap size={16} strokeWidth={2.5} />
                           Analyze
                         </>
                       )}
                     </motion.button>
                   </div>
-                ) : (
-                  // No photo - show capture button
+
+                  {/* Photo Info */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-center text-xs text-white/60"
+                  >
+                    Photo ready for analysis
+                  </motion.div>
+                </div>
+              ) : (
+                // Ready State - Capture
+                <div className="space-y-4">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={capturePhoto}
                     disabled={!isCameraReady}
-                    className={`px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-2xl shadow-lg flex items-center gap-3 ${
-                      !isCameraReady ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`w-full px-8 py-4 text-white font-bold rounded-full shadow-lg flex items-center justify-center gap-3 transition-all ${!isCameraReady
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:shadow-xl"
+                      }`}
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+                    }}
                   >
-                    <Zap size={20} strokeWidth={2.5} />
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <Camera size={20} strokeWidth={2.5} />
+                    </motion.div>
                     Capture Photo
                   </motion.button>
-                )}
-              </>
-            )}
 
-            {/* Info Cards */}
-            {!capturedPhoto && (
-              <div className="flex gap-2 w-full max-w-sm">
-                <motion.div
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="flex-1 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20"
-                >
-                  <div className="flex items-center gap-2 text-white">
-                    <AlertCircle size={16} />
-                    <span className="text-xs font-medium">AI Powered</span>
+                  {/* Info Pills */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="px-4 py-2.5 rounded-full text-xs font-semibold text-white flex items-center justify-center gap-2"
+                      style={{
+                        background: "rgba(16, 185, 129, 0.25)",
+                        border: "1px solid rgba(16, 185, 129, 0.4)",
+                      }}
+                    >
+                      <Sparkles size={14} />
+                      AI Powered
+                    </motion.div>
+                    <motion.div
+                      initial={{ x: 20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="px-4 py-2.5 rounded-full text-xs font-semibold text-white flex items-center justify-center gap-2"
+                      style={{
+                        background: "rgba(16, 185, 129, 0.25)",
+                        border: "1px solid rgba(16, 185, 129, 0.4)",
+                      }}
+                    >
+                      <Camera size={14} />
+                      Live Camera
+                    </motion.div>
                   </div>
-                </motion.div>
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="flex-1 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20"
-                >
-                  <div className="flex items-center gap-2 text-white">
-                    <Camera size={16} />
-                    <span className="text-xs font-medium">Photo Mode</span>
-                  </div>
-                </motion.div>
-              </div>
-            )}
-          </div>
-        </div>
+                </div>
+              )}
+            </>
+          )}
+        </motion.div>
       </main>
 
       {/* Analysis Result Overlay */}
