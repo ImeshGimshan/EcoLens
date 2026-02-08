@@ -7,7 +7,7 @@ interface MobileFrameProps {
 export function MobileFrame({ children }: MobileFrameProps) {
   return (
     <div className="min-h-screen w-full flex justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-[var(--color-eggshell)] min-h-screen relative shadow-2xl flex flex-col">
+      <div className="w-full max-w-md bg-eggshell min-h-screen relative shadow-2xl flex flex-col">
         {children}
       </div>
     </div>

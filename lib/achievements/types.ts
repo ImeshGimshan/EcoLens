@@ -32,6 +32,8 @@ export interface UnlockedAchievement {
 
 export interface UserStats {
   userId: string;
+  userName?: string;
+  userEmail?: string;
   points: number;
   level: number;
   totalScans: number;

@@ -17,17 +17,31 @@ import { db } from '@/lib/firebase';
 import { UserStats, UnlockedAchievement, PointsTransaction } from './types';
 
 // Initialize user stats when they first sign up
-export async function initializeUserStats(userId: string, userEmail?: string): Promise<UserStats> {
+export async function initializeUserStats(userId: string, userEmail?: string, userName?: string): Promise<UserStats> {
   const userStatsRef = doc(db, 'userStats', userId);
   
   // Check if stats already exist
   const existingStats = await getDoc(userStatsRef);
   if (existingStats.exists()) {
-    return existingStats.data() as UserStats;
+    const stats = existingStats.data() as UserStats;
+    
+    // Update userName and userEmail if they're missing but now available
+    const needsUpdate = (!stats.userName && userName) || (!stats.userEmail && userEmail);
+    if (needsUpdate) {
+      const updates: any = { updatedAt: serverTimestamp() };
+      if (!stats.userName && userName) updates.userName = userName;
+      if (!stats.userEmail && userEmail) updates.userEmail = userEmail;
+      await updateDoc(userStatsRef, updates);
+      return { ...stats, userName: userName || stats.userName, userEmail: userEmail || stats.userEmail };
+    }
+    
+    return stats;
   }
   
   const initialStats: UserStats = {
     userId,
+    userName: userName || userEmail?.split('@')[0] || 'Anonymous',
+    userEmail: userEmail,
     points: 0,
     level: 1,
     totalScans: 0,

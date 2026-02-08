@@ -57,9 +57,9 @@ export default function LoginPage() {
           <motion.div
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl shadow-lg"
+            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg"
           >
-            🌿
+            <img src="/logo.svg" alt="EcoLens Logo" className="w-8 h-8" />
           </motion.div>
           <div>
             <h1 className="text-2xl font-semibold">EcoLens</h1>
@@ -83,7 +83,7 @@ export default function LoginPage() {
             className="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center shadow-lg"
             style={{ background: 'var(--gradient-primary)' }}
           >
-            <Leaf size={40} className="text-white" strokeWidth={2} />
+            <img src="/logo.svg" alt="EcoLens Logo" className="w-12 h-12" />
           </motion.div>
           <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-forest)' }}>
             Welcome Back

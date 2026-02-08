@@ -47,9 +47,9 @@ export function AppHeader({
             <motion.div
               animate={{ rotate: [0, 2, -2, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-gray-100 text-gray-700"
+              className="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-100"
             >
-              {icon}
+              <img src="/logo.svg" alt="EcoLens Logo" className="w-6 h-6" />
             </motion.div>
           )}
           <div>

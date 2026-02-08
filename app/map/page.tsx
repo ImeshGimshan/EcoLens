@@ -134,11 +134,20 @@ export default function MapPage() {
         className="px-6 py-4 text-white flex items-center justify-between"
         style={{ background: 'var(--gradient-primary)' }}
       >
-        <div className="flex-1">
-          <h1 className="text-2xl font-semibold text-white">Explore Map</h1>
-          <p className="text-xs mt-1 text-white/90">
-            {sites.length} heritage {sites.length === 1 ? 'site' : 'sites'} nearby
-          </p>
+        <div className="flex items-center gap-3 flex-1">
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg"
+          >
+            <img src="/logo.svg" alt="EcoLens Logo" className="w-8 h-8" />
+          </motion.div>
+          <div className="flex-1">
+            <h1 className="text-2xl font-semibold text-white">Explore Map</h1>
+            <p className="text-xs mt-1 text-white/90">
+              {sites.length} heritage {sites.length === 1 ? 'site' : 'sites'} nearby
+            </p>
+          </div>
         </div>
         <motion.button
           whileHover={{ scale: 1.1 }}

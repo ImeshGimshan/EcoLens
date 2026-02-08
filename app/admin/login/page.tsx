@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#7ED957] to-[#6DC54D] rounded-2xl shadow-2xl mb-6"
           >
-            <Shield className="w-10 h-10 text-white" strokeWidth={2.5} />
+            <img src="/logo.svg" alt="EcoLens Logo" className="w-12 h-12" />
           </motion.div>
           <motion.h1
             initial={{ y: -20, opacity: 0 }}

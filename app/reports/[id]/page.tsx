@@ -191,9 +191,9 @@ export default function UserReportDetailPage({
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl shadow-lg"
+              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg"
             >
-              📋
+              <img src="/logo.svg" alt="EcoLens Logo" className="w-8 h-8" />
             </motion.div>
             <div>
               <h1 className="text-2xl font-semibold">

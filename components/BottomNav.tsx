@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Map, Camera, Trophy, History } from "lucide-react";
+import { Map, Camera, Trophy, History, Home } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -12,7 +12,8 @@ export function BottomNav() {
   const isActive = (path: string) => pathname === path;
 
   const navItems = [
-    { path: "/", icon: Map, label: "Explore" },
+    { path: "/", icon: Home, label: "Home" },
+    { path: "/map", icon: Map, label: "Map" },
     { path: "/scan", icon: Camera, label: "Scan", isCenter: true },
     { path: "/reports", icon: History, label: "History" },
     { path: "/leaderboard", icon: Trophy, label: "Rank" },

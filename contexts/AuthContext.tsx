@@ -40,7 +40,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (user) {
         try {
           const { initializeUserStats } = await import('@/lib/achievements/firestore');
-          await initializeUserStats(user.uid, user.email || undefined);
+          await initializeUserStats(
+            user.uid, 
+            user.email || undefined,
+            user.displayName || undefined
+          );
         } catch (error) {
           console.error('Error initializing user stats:', error);
         }

@@ -50,9 +50,9 @@ export default function LeaderboardPage() {
           <motion.div
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl shadow-lg"
+            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg"
           >
-            🏆
+            <img src="/logo.svg" alt="EcoLens Logo" className="w-8 h-8" />
           </motion.div>
           <div>
             <h1 className="text-2xl font-semibold">Rank</h1>
@@ -146,7 +146,7 @@ export default function LeaderboardPage() {
                         <div
                           className={`bg-linear-to-br ${gradients[idx]} bg-opacity-10 rounded-xl p-3 ${heights[idx]} flex flex-col justify-end`}
                         >
-                          <p className="font-bold text-sm truncate" style={{ color: 'var(--color-forest)' }}>
+                          <p className="font-bold text-sm truncate text-gray-900">
                             {entry.userName || 'Anonymous'}
                           </p>
                           <p className="text-xs text-gray-600">{entry.points} pts</p>
@@ -175,7 +175,7 @@ export default function LeaderboardPage() {
                         {entry.rank}
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-sm" style={{ color: 'var(--color-forest)' }}>
+                        <p className="font-bold text-sm text-gray-900">
                           {entry.userName || 'Anonymous'}
                         </p>
                         <div className="flex items-center gap-1 text-gray-500">

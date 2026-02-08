@@ -11,7 +11,7 @@ import {
   Sparkles,
   MapPin,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnalysisResultOverlay } from "@/components/AnalysisResultOverlay";
 import { AnalysisResult } from "@/lib/ai/types";
@@ -20,7 +20,7 @@ import { useState as useStateForAchievements } from "react";
 import { Achievement } from "@/lib/achievements/types";
 import { AchievementUnlockModal } from "@/components/AchievementUnlockModal";
 
-export default function ScanPage() {
+function ScanContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -234,9 +234,9 @@ export default function ScanPage() {
           <motion.div
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl shadow-lg"
+            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg"
           >
-            📸
+            <img src="/logo.svg" alt="EcoLens Logo" className="w-8 h-8" />
           </motion.div>
           <div>
             <h1 className="text-2xl font-semibold text-white">
@@ -620,5 +620,29 @@ export default function ScanPage() {
 
       <BottomNav />
     </MobileFrame>
+  );
+}
+
+export default function ScanPage() {
+  return (
+    <Suspense fallback={
+      <MobileFrame>
+        <div className="flex-1 flex items-center justify-center" style={{ background: 'var(--color-eggshell)' }}>
+          <div className="text-center">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 mx-auto mb-4"
+            >
+              <Sparkles size={48} style={{ color: 'var(--color-forest)' }} />
+            </motion.div>
+            <p className="text-gray-600">Loading scanner...</p>
+          </div>
+        </div>
+        <BottomNav />
+      </MobileFrame>
+    }>
+      <ScanContent />
+    </Suspense>
   );
 }
