@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, User, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -67,15 +67,6 @@ export function AppHeader({
         {/* Right Section - Actions */}
         {showActions && (
           <div className="flex items-center gap-3">
-            {/* Notification Bell */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors duration-200"
-            >
-              <Bell size={19} strokeWidth={1.8} />
-            </motion.button>
-
             {user ? (
               <div className="relative">
                 {/* User Avatar Button */}

@@ -10,13 +10,15 @@ import {
   RotateCcw,
   Sparkles,
   MapPin,
-  CrosshairIcon,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnalysisResultOverlay } from "@/components/AnalysisResultOverlay";
 import { AnalysisResult } from "@/lib/ai/types";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState as useStateForAchievements } from "react";
+import { Achievement } from "@/lib/achievements/types";
+import { AchievementUnlockModal } from "@/components/AchievementUnlockModal";
 
 export default function ScanPage() {
   const { user } = useAuth();
@@ -34,6 +36,10 @@ export default function ScanPage() {
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [provider, setProvider] = useState<string | undefined>(undefined);
   const [showResult, setShowResult] = useState(false);
+  const [unlockedAchievements, setUnlockedAchievements] = useState<Achievement[]>([]);
+  const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
+  const [achievementPoints, setAchievementPoints] = useState(0);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -179,6 +185,26 @@ export default function ScanPage() {
         setImageUrl(data.metadata?.imageUrl);
         setProvider(data.provider);
         setShowResult(true);
+
+        // Handle achievement unlocking
+        if (user) {
+          try {
+            const { handleScanCompleted } = await import('@/lib/achievements/service');
+            const result = await handleScanCompleted(user.uid, location?.name || 'unknown');
+
+            // Show achievement modals if any were unlocked
+            if (result.newAchievements.length > 0) {
+              setUnlockedAchievements(result.newAchievements);
+              setCurrentAchievement(result.newAchievements[0]);
+              setAchievementPoints(result.newAchievements[0].points);
+              setShowAchievementModal(true);
+            }
+
+            console.log(`Earned ${result.points} points (including ${result.streakBonus} streak bonus)`);
+          } catch (achievementError) {
+            console.error('Error processing achievements:', achievementError);
+          }
+        }
       } else {
         throw new Error(data.error || "Analysis failed to return results");
       }
@@ -196,375 +222,359 @@ export default function ScanPage() {
 
   return (
     <MobileFrame>
-      {/* Premium Header */}
+      {/* Header with Green Background like Home */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative px-6 pt-4 pb-3 text-white overflow-hidden"
-        style={{ background: "var(--gradient-hero)" }}
+        transition={{ duration: 0.5 }}
+        className="px-6 py-6 text-white"
+        style={{ background: 'var(--gradient-primary)' }}
       >
-        {/* Decorative Background Elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div
-            className="absolute -top-20 -right-20 w-48 h-48 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
-            }}
-          ></div>
-          <div
-            className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)",
-            }}
-          ></div>
+        <div className="flex items-center gap-3 mb-4">
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl shadow-lg"
+          >
+            📸
+          </motion.div>
+          <div>
+            <h1 className="text-2xl font-semibold text-white">
+              Scan Heritage
+            </h1>
+            <p className="text-sm text-white/90 mt-0.5">
+              AI-powered conservation analysis
+            </p>
+          </div>
         </div>
 
-        <div className="relative z-10">
-          {/* Title Section */}
-          <h1 className="text-xl font-bold tracking-tight mb-1">
-            Scan Heritage
-          </h1>
-          <p className="text-white/80 text-xs font-medium">
-            AI-powered conservation analysis
-          </p>
+        {/* <div> */}
 
+        <div>
           {/* Status Indicator */}
           {isCameraReady && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-1 inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-medium"
+              transition={{ delay: 0.3 }}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
               style={{
-                background: "rgba(16, 185, 129, 0.2)",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
+                background: "rgba(255, 255, 255, 0.2)",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
               }}
             >
               <motion.div
                 animate={{ scale: [1, 1.3, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="w-1.5 h-1.5 rounded-full bg-green-400"
+                className="w-2 h-2 rounded-full bg-white shadow-lg"
               ></motion.div>
-              <span style={{ color: "#10B981" }}>Camera Ready</span>
+              <span className="text-white">Camera Ready</span>
             </motion.div>
           )}
-        </div>
 
-        {/* Heritage Site Info Banner */}
-        <AnimatePresence>
-          {location?.name && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-1 p-2 rounded-2xl"
-              style={{
-                background: "rgba(4, 120, 87, 0.2)",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
-                backdropFilter: "blur(12px)",
-              }}
-            >
-              <div className="flex items-start gap-2">
-                <MapPin
-                  size={16}
-                  className="mt-0.5 shrink-0"
-                  style={{ color: "#6EE7B7" }}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
-                    {location.name}
-                  </p>
-                  {location.address && (
-                    <p
-                      className="text-xs mt-0.5 truncate opacity-75"
-                      style={{ color: "#A7F3D0" }}
-                    >
-                      {location.address}
+          {/* Heritage Site Info Banner */}
+          <AnimatePresence>
+            {location?.name && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-3 p-3 rounded-xl"
+                style={{
+                  background: "rgba(255, 255, 255, 0.15)",
+                  border: "1px solid rgba(255, 255, 255, 0.25)",
+                  backdropFilter: "blur(10px)",
+                }}
+              >
+                <div className="flex items-start gap-2">
+                  <MapPin
+                    size={16}
+                    className="mt-0.5 shrink-0 text-white"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white">
+                      {location.name}
                     </p>
-                  )}
+                    {location.address && (
+                      <p
+                        className="text-xs mt-1 truncate text-white/80"
+                      >
+                        {location.address}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.header>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-y-auto pb-24 px-4 py-4" style={{ background: 'var(--color-eggshell)' }}>
+
+        {/* Error Toast */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="mb-4 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 bg-red-500/90"
+            >
+              <AlertCircle size={18} className="shrink-0 text-white" />
+              <p className="text-sm font-medium text-white flex-1">{error}</p>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setError(null)}
+                className="text-white/80 hover:text-white"
+              >
+                <RotateCcw size={16} />
+              </motion.button>
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.header>
 
-      {/* Camera View Container */}
-      <main className="flex-1 flex flex-col relative overflow-hidden pb-20" style={{ background: "var(--color-eggshell)" }}>
-        {/* Camera/Preview Area */}
-        <div className="flex-1 relative overflow-hidden" style={{ background: "#0F172A" }}>
-          {/* Video Feed or Captured Photo */}
-          {capturedPhoto ? (
-            <motion.img
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              src={capturedPhoto}
-              alt="Captured"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
-
-          {/* Hidden Canvas */}
-          <canvas ref={canvasRef} className="hidden" />
-
-          {/* Analyzing Overlay */}
-          <AnimatePresence>
-            {isAnalyzing && (
-              <motion.div
+        {/* Camera Card */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-md mb-4"
+        >
+          <div className="relative w-full aspect-square bg-gray-900 overflow-hidden">
+            {/* Video Feed or Captured Photo */}
+            {capturedPhoto ? (
+              <motion.img
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 z-30 flex flex-col items-center justify-center"
-                style={{
-                  background: "rgba(31, 41, 55, 0.7)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
+                src={capturedPhoto}
+                alt="Captured"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            )}
+
+            {/* Hidden Canvas */}
+            <canvas ref={canvasRef} className="hidden" />
+
+            {/* Analyzing Overlay */}
+            <AnimatePresence>
+              {isAnalyzing && (
                 <motion.div
-                  animate={{
-                    scale: [1, 1.15, 1],
-                    opacity: [0.6, 1, 0.6],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-24 h-24 rounded-full flex items-center justify-center mb-4 shadow-2xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-30 flex flex-col items-center justify-center"
                   style={{
-                    background:
-                      "linear-gradient(135deg, rgba(4, 120, 87, 0.3) 0%, rgba(16, 185, 129, 0.1) 100%)",
-                    border: "2px solid rgba(16, 185, 129, 0.4)",
+                    background: "rgba(15, 23, 42, 0.8)",
+                    backdropFilter: "blur(8px)",
                   }}
                 >
                   <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    animate={{
+                      scale: [1, 1.15, 1],
+                      opacity: [0.6, 1, 0.6],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+                    style={{
+                      background: "rgba(126, 217, 87, 0.1)",
+                      border: "2px solid rgba(126, 217, 87, 0.3)",
+                    }}
                   >
-                    <Sparkles size={40} style={{ color: "#10B981" }} />
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Sparkles size={36} style={{ color: 'var(--color-forest)' }} />
+                    </motion.div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-center"
+                  >
+                    <p className="text-white font-semibold text-sm mb-1">
+                      Analyzing...
+                    </p>
+                    <p className="text-white/60 text-xs">
+                      Processing heritage data
+                    </p>
                   </motion.div>
                 </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Crosshair Scanner Frame */}
+            {!capturedPhoto && isCameraReady && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="absolute inset-0 pointer-events-none p-8 flex items-center justify-center"
+              >
+                <div className="relative w-full h-full max-w-xs max-h-96">
+                  {/* Corner Brackets */}
+                  <div
+                    className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 rounded-tl-lg"
+                    style={{ borderColor: 'var(--color-forest)' }}
+                  ></div>
+                  <div
+                    className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 rounded-tr-lg"
+                    style={{ borderColor: 'var(--color-forest)' }}
+                  ></div>
+                  <div
+                    className="absolute bottom-0 left-0 w-10 h-10 border-b-2 border-l-2 rounded-bl-lg"
+                    style={{ borderColor: 'var(--color-forest)' }}
+                  ></div>
+                  <div
+                    className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 rounded-br-lg"
+                    style={{ borderColor: 'var(--color-forest)' }}
+                  ></div>
+
+                  {/* Center Crosshair */}
+                  <motion.div
+                    animate={{ scale: [0.9, 1.1, 0.9] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute inset-0 flex items-center justify-center"
+                  >
+                    <div className="w-px h-6" style={{ background: 'var(--color-forest)', opacity: 0.6 }}></div>
+                    <div className="absolute w-6 h-px" style={{ background: 'var(--color-forest)', opacity: 0.6 }}></div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Controls Section */}
+        {!showResult && (
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-3 mt-2"
+          >
+            {capturedPhoto ? (
+              // Captured State - Retake & Analyze
+              <>
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={retakePhoto}
+                    disabled={isAnalyzing}
+                    className="flex-1 px-5 py-3.5 font-semibold rounded-xl text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 border-2 border-gray-200 bg-white hover:bg-gray-50 shadow-sm"
+                    style={{ color: 'var(--color-forest)' }}
+                  >
+                    <RotateCcw size={18} strokeWidth={2.5} />
+                    Retake
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={analyzePhoto}
+                    disabled={isAnalyzing}
+                    className="flex-1 px-5 py-3.5 font-semibold rounded-xl text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-md"
+                    style={{ background: 'var(--gradient-primary)' }}
+                  >
+                    {isAnalyzing ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Sparkles size={18} strokeWidth={2.5} />
+                      </motion.div>
+                    ) : (
+                      <>
+                        <Zap size={18} strokeWidth={2.5} />
+                        Analyze
+                      </>
+                    )}
+                  </motion.button>
+                </div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-center"
+                  transition={{ delay: 0.2 }}
+                  className="text-center text-xs text-gray-500 pt-1"
                 >
-                  <p className="text-white font-semibold text-lg mb-2">
-                    Analyzing...
-                  </p>
-                  <p className="text-white/60 text-xs">
-                    Processing heritage data
-                  </p>
+                  Photo ready for analysis
                 </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Error Toast */}
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="absolute top-4 left-4 right-4 z-40 px-4 py-3 rounded-xl shadow-xl flex items-center gap-3"
-                style={{
-                  background: "rgba(239, 68, 68, 0.9)",
-                  backdropFilter: "blur(12px)",
-                }}
-              >
-                <AlertCircle size={18} className="shrink-0 text-white" />
-                <p className="text-sm font-medium text-white flex-1">{error}</p>
+              </>
+            ) : (
+              // Ready State - Capture
+              <>
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setError(null)}
-                  className="text-white/80 hover:text-white"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={capturePhoto}
+                  disabled={!isCameraReady}
+                  className={`w-full px-8 py-4 text-white font-bold rounded-lg flex items-center justify-center gap-3 transition-all ${!isCameraReady
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:shadow-lg"
+                    }`}
+                  style={{
+                    background: "var(--gradient-primary)",
+                  }}
                 >
-                  <RotateCcw size={16} />
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Crosshair Scanner Frame */}
-          {!capturedPhoto && isCameraReady && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-              className="absolute inset-0 pointer-events-none p-8 flex items-center justify-center"
-            >
-              {/* Corner Brackets */}
-              <div className="relative w-full h-full max-w-xs max-h-96">
-                <div
-                  className="absolute top-0 left-0 w-12 h-12 border-t-3 border-l-3 rounded-tl-2xl"
-                  style={{ borderColor: "rgba(16, 185, 129, 0.6)" }}
-                ></div>
-                <div
-                  className="absolute top-0 right-0 w-12 h-12 border-t-3 border-r-3 rounded-tr-2xl"
-                  style={{ borderColor: "rgba(16, 185, 129, 0.6)" }}
-                ></div>
-                <div
-                  className="absolute bottom-0 left-0 w-12 h-12 border-b-3 border-l-3 rounded-bl-2xl"
-                  style={{ borderColor: "rgba(16, 185, 129, 0.6)" }}
-                ></div>
-                <div
-                  className="absolute bottom-0 right-0 w-12 h-12 border-b-3 border-r-3 rounded-br-2xl"
-                  style={{ borderColor: "rgba(16, 185, 129, 0.6)" }}
-                ></div>
-
-                {/* Center Crosshair */}
-                <motion.div
-                  animate={{ scale: [0.9, 1.1, 0.9] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <div className="w-1 h-8" style={{ background: "rgba(16, 185, 129, 0.4)" }}></div>
-                  <div className="absolute w-8 h-1" style={{ background: "rgba(16, 185, 129, 0.4)" }}></div>
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </div>
-
-        {/* Controls Section - Fixed Bottom */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="sticky bottom-0 p-5 pt-6 z-20"
-          style={{
-            background: "var(--color-eggshell)",
-          }}
-        >
-          {!showResult && (
-            <>
-              {capturedPhoto ? (
-                // Captured State - Retake & Analyze
-                <div className="space-y-3">
-                  <div className="flex gap-3">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={retakePhoto}
-                      disabled={isAnalyzing}
-                      className="flex-1 px-6 py-3 font-semibold rounded-full text-white shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-                      style={{
-                        background: "rgba(16, 185, 129, 0.2)",
-                        border: "1.5px solid rgba(16, 185, 129, 0.4)",
-                      }}
-                    >
-                      <RotateCcw size={16} strokeWidth={2.5} />
-                      Retake
-                    </motion.button>
-
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={analyzePhoto}
-                      disabled={isAnalyzing}
-                      className="flex-1 px-6 py-3 font-semibold rounded-full text-white shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
-                      }}
-                    >
-                      {isAnalyzing ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Sparkles size={16} strokeWidth={2.5} />
-                        </motion.div>
-                      ) : (
-                        <>
-                          <Zap size={16} strokeWidth={2.5} />
-                          Analyze
-                        </>
-                      )}
-                    </motion.button>
-                  </div>
-
-                  {/* Photo Info */}
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-center text-xs text-white/60"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
                   >
-                    Photo ready for analysis
+                    <Camera size={20} strokeWidth={2} />
                   </motion.div>
-                </div>
-              ) : (
-                // Ready State - Capture
-                <div className="space-y-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={capturePhoto}
-                    disabled={!isCameraReady}
-                    className={`w-full px-8 py-4 text-white font-bold rounded-full shadow-lg flex items-center justify-center gap-3 transition-all ${!isCameraReady
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:shadow-xl"
-                      }`}
+                  Capture Photo
+                </motion.button>
+
+                {/* Info Pills */}
+                <div className="grid grid-cols-2 gap-3">
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="px-4 py-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border"
                     style={{
-                      background:
-                        "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+                      color: 'var(--color-forest)',
+                      background: 'var(--color-eggshell)',
+                      borderColor: 'rgba(126, 217, 87, 0.2)',
                     }}
                   >
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <Camera size={20} strokeWidth={2.5} />
-                    </motion.div>
-                    Capture Photo
-                  </motion.button>
-
-                  {/* Info Pills */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      className="px-4 py-2.5 rounded-full text-xs font-semibold text-white flex items-center justify-center gap-2"
-                      style={{
-                        background: "rgba(16, 185, 129, 0.25)",
-                        border: "1px solid rgba(16, 185, 129, 0.4)",
-                      }}
-                    >
-                      <Sparkles size={14} />
-                      AI Powered
-                    </motion.div>
-                    <motion.div
-                      initial={{ x: 20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="px-4 py-2.5 rounded-full text-xs font-semibold text-white flex items-center justify-center gap-2"
-                      style={{
-                        background: "rgba(16, 185, 129, 0.25)",
-                        border: "1px solid rgba(16, 185, 129, 0.4)",
-                      }}
-                    >
-                      <Camera size={14} />
-                      Live Camera
-                    </motion.div>
-                  </div>
+                    <Sparkles size={14} />
+                    AI Powered
+                  </motion.div>
+                  <motion.div
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="px-4 py-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border"
+                    style={{
+                      color: 'var(--color-forest)',
+                      background: 'var(--color-eggshell)',
+                      borderColor: 'rgba(126, 217, 87, 0.2)',
+                    }}
+                  >
+                    <Camera size={14} />
+                    Live Camera
+                  </motion.div>
                 </div>
-              )}
-            </>
-          )}
-        </motion.div>
+              </>
+            )}
+          </motion.div>
+        )}
       </main>
 
       {/* Analysis Result Overlay */}
@@ -577,6 +587,33 @@ export default function ScanPage() {
             userId={user?.uid}
             userEmail={user?.email || undefined}
             onClose={() => setShowResult(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Achievement Unlock Modal */}
+      <AnimatePresence>
+        {showAchievementModal && currentAchievement && (
+          <AchievementUnlockModal
+            achievement={currentAchievement}
+            points={achievementPoints}
+            onClose={() => {
+              setShowAchievementModal(false);
+
+              // Show next achievement if there are more
+              const currentIndex = unlockedAchievements.findIndex(
+                a => a.id === currentAchievement.id
+              );
+              if (currentIndex < unlockedAchievements.length - 1) {
+                const nextAchievement = unlockedAchievements[currentIndex + 1];
+                setCurrentAchievement(nextAchievement);
+                setAchievementPoints(nextAchievement.points);
+                setTimeout(() => setShowAchievementModal(true), 300);
+              } else {
+                setCurrentAchievement(null);
+                setUnlockedAchievements([]);
+              }
+            }}
           />
         )}
       </AnimatePresence>

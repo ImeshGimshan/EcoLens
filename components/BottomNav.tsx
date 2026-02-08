@@ -31,28 +31,28 @@ export function BottomNav() {
               if (item.isCenter) {
                 // Center Scan Button - Premium Style
                 return (
-                  <Link key={item.path} href={item.path} className="relative">
+                  <Link key={item.path} href={item.path} className="relative flex items-center justify-center">
                     <motion.div
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.92 }}
-                      className="relative -mt-5"
+                      className="relative flex items-center justify-center"
                     >
                       {/* Main button with gradient background */}
                       <motion.div
                         animate={{
                           boxShadow: active
-                            ? "0 12px 24px rgba(4, 120, 87, 0.25)"
-                            : "0 8px 16px rgba(4, 120, 87, 0.15)",
+                            ? "0 12px 24px rgba(126, 217, 87, 0.25)"
+                            : "0 8px 16px rgba(126, 217, 87, 0.15)",
                         }}
-                        className="relative w-14 h-14 rounded-xl shadow-lg flex items-center justify-center border border-emerald-600/20 transition-all"
+                        className="relative w-14 h-14 rounded-xl shadow-lg flex items-center justify-center border transition-all"
                         style={{
-                          background:
-                            "linear-gradient(135deg, #059669 0%, #10B981 100%)",
+                          background: "var(--gradient-primary)",
+                          borderColor: "rgba(126, 217, 87, 0.2)",
                         }}
                       >
                         <Icon
                           size={24}
-                          className="text-white"
+                          className="text-white shrink-0"
                           strokeWidth={2.2}
                         />
                       </motion.div>
@@ -63,7 +63,8 @@ export function BottomNav() {
                           layoutId="centerIndicator"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-emerald-600 rounded-full"
+                          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
+                          style={{ background: "var(--color-forest)" }}
                         />
                       )}
                     </motion.div>
@@ -82,7 +83,7 @@ export function BottomNav() {
                     {/* Icon with smooth transition */}
                     <motion.div
                       animate={{
-                        color: active ? "#047857" : "#D1D5DB",
+                        color: active ? "var(--color-forest)" : "#D1D5DB",
                       }}
                       transition={{ duration: 0.2 }}
                       className="relative"
@@ -97,7 +98,11 @@ export function BottomNav() {
                       {active && (
                         <motion.div
                           layoutId="activeGlow"
-                          className="absolute inset-0 -z-10 bg-emerald-100 rounded-lg blur-md scale-125 opacity-0 group-hover:opacity-100"
+                          className="absolute inset-0 -z-10 rounded-lg blur-md scale-125 opacity-0 group-hover:opacity-100"
+                          style={{
+                            background: "var(--color-forest)",
+                            opacity: 0.1,
+                          }}
                         />
                       )}
                     </motion.div>
@@ -105,7 +110,7 @@ export function BottomNav() {
                     {/* Label with smooth color transition */}
                     <motion.span
                       animate={{
-                        color: active ? "#047857" : "#9CA3AF",
+                        color: active ? "var(--color-forest)" : "#9CA3AF",
                       }}
                       transition={{ duration: 0.2 }}
                       className="text-xs font-semibold tracking-wide"
@@ -119,7 +124,8 @@ export function BottomNav() {
                         layoutId="activeIndicator"
                         initial={{ scaleX: 0 }}
                         animate={{ scaleX: 1 }}
-                        className="absolute -bottom-0.5 w-1.5 h-1 bg-emerald-600 rounded-full origin-center"
+                        className="absolute -bottom-0.5 w-1.5 h-1 rounded-full origin-center"
+                        style={{ background: "var(--color-forest)" }}
                       />
                     )}
                   </motion.div>

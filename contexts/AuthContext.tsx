@@ -20,8 +20,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  signInWithGoogle: async () => {},
-  signOut: async () => {},
+  signInWithGoogle: async () => { },
+  signOut: async () => { },
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -29,8 +29,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+
+      // Initialize user stats if this is a new user
+      if (user) {
+        try {
+          const { initializeUserStats } = await import('@/lib/achievements/firestore');
+          await initializeUserStats(user.uid, user.email || undefined);
+        } catch (error) {
+          console.error('Error initializing user stats:', error);
+        }
+      }
+
       setLoading(false);
     });
 
