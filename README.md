@@ -295,7 +295,7 @@ For support, email your-email@example.com or open an issue on GitHub.
 
 ## 🔗 Links
 
-- [Live Demo](https://ecolens.vercel.app)
+- [Live Demo](https://63e9-220-247-221-156.ngrok-free.app/)
 - [Documentation](https://github.com/yourusername/ecolens/wiki)
 - [Report Bug](https://github.com/yourusername/ecolens/issues)
 - [Request Feature](https://github.com/yourusername/ecolens/issues)
