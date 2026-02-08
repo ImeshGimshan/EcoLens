@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@types/date-fns": "^2.5.3",
     "cloudinary": "^2.9.0",
     "date-fns": "^4.1.0",
     "firebase": "^12.9.0",
