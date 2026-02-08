@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Sparkles, Shield, Leaf, Award, MapPin, Loader2 } from "lucide-react";
+import { Sparkles, Shield, Leaf, Award, MapPin, Loader2, Camera } from "lucide-react";
+import { MobileFrame } from "@/components/MobileFrame";
 
 export default function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth();
@@ -91,9 +92,6 @@ export default function LoginPage() {
             Sign in to continue protecting heritage sites
           </p>
         </motion.div>
-        <h1 className="text-5xl font-bold text-gray-900 mb-3">EcoLens</h1>
-        <p className="text-gray-600 font-medium text-lg">Heritage Guardian</p>
-      </motion.div>
 
         {/* Features Grid */}
         <motion.div
@@ -137,7 +135,6 @@ export default function LoginPage() {
               Monitor damage
             </p>
           </div>
-        </div>
 
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className="w-10 h-10 rounded-lg mb-2 flex items-center justify-center bg-orange-50">
@@ -150,7 +147,7 @@ export default function LoginPage() {
               Compete & rank
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Sign In Button */}
         <motion.button
@@ -183,29 +180,30 @@ export default function LoginPage() {
           Continue with Google
         </motion.button>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.6 }}
-        className="text-xs text-gray-500 text-center mt-8 max-w-md px-6"
-      >
-        By continuing, you agree to our Terms of Service and Privacy Policy.
-        Help preserve heritage sites for future generations.
-      </motion.p>
-
-      {/* Admin Link */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.6 }}
-        className="mt-6"
-      >
-        <a
-          href="/admin/login"
-          className="text-sm text-gray-400 hover:text-[#7ED957] transition-colors flex items-center gap-2"
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
+          className="text-xs text-gray-500 text-center mt-8 max-w-md px-6"
         >
-          By continuing, you agree to our Terms of Service and Privacy Policy
+          By continuing, you agree to our Terms of Service and Privacy Policy.
+          Help preserve heritage sites for future generations.
         </motion.p>
+
+        {/* Admin Link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+          className="mt-6"
+        >
+          <a
+            href="/admin/login"
+            className="text-sm text-gray-400 hover:text-forest transition-colors flex items-center gap-2"
+          >
+            Admin Access
+          </a>
+        </motion.div>
       </main>
     </MobileFrame>
   );

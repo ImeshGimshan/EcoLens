@@ -9,12 +9,7 @@ import {
   GoogleAuthProvider,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-
-// Admin email list - in production, store this in Firestore or environment variables
-const ADMIN_EMAILS = [
-  "admin@ecolens.com",
-  "dinijayo@gmail.com", // Add your admin emails here
-];
+import { getAdminEmails } from "@/lib/admin/config";
 
 interface AuthContextType {
   user: User | null;
@@ -49,9 +44,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
           console.error('Error initializing user stats:', error);
         }
+
+        // Check if user is admin by fetching from Firestore
+        try {
+          const adminEmails = await getAdminEmails();
+          setIsAdmin(adminEmails.includes(user.email || ""));
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
       }
 
-      setIsAdmin(user ? ADMIN_EMAILS.includes(user.email || "") : false);
       setLoading(false);
     });
 
