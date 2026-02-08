@@ -74,33 +74,33 @@ export default function UserReportsPage() {
     switch (condition?.toLowerCase()) {
       case "excellent":
       case "good":
-        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800";
+        return "bg-[#7ED957]/10 text-[#6DC54D] border-[#7ED957]/30";
       case "fair":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800";
+        return "bg-yellow-50 text-yellow-700 border-yellow-200";
       case "poor":
-        return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800";
+        return "bg-orange-50 text-orange-700 border-orange-200";
       case "critical":
-        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800";
+        return "bg-[#e07856]/10 text-[#c85a42] border-[#e07856]/30";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
+        return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
 
   if (authLoading || (loading && user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      <div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#7ED957]" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-black p-6 text-center">
-        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-          <Info className="text-gray-400" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fafafa] p-6 text-center">
+        <div className="w-20 h-20 bg-[#7ED957]/10 rounded-full flex items-center justify-center mb-4">
+          <Info className="text-[#7ED957]" size={32} />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
           Login Required
         </h1>
         <p className="text-gray-500 mb-6">
@@ -108,7 +108,7 @@ export default function UserReportsPage() {
         </p>
         <Link
           href="/"
-          className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium"
+          className="px-8 py-3 bg-[#7ED957] hover:bg-[#6DC54D] text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
         >
           Return Home
         </Link>
@@ -117,74 +117,73 @@ export default function UserReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black pb-24">
-      <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-        {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
+    <div className="min-h-screen bg-[#fafafa] pb-24">
+      {/* Modern Top Bar */}
+      <div style={{ background: 'linear-gradient(135deg, #7ED957 0%, #8FE066 100%)' }} className="shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
               <Link
                 href="/"
-                className="p-2 -ml-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors"
+                className="p-2.5 hover:bg-white/20 rounded-xl transition-colors"
               >
-                <ArrowLeft
-                  size={20}
-                  className="text-gray-600 dark:text-gray-400"
-                />
+                <ArrowLeft size={24} className="text-white" />
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                My Scans
-              </h1>
+              <div>
+                <h1 className="text-4xl font-bold text-white">My Scans</h1>
+                <p className="text-white/90 text-lg mt-1">
+                  {reports.length} report{reports.length !== 1 && "s"} found
+                </p>
+              </div>
             </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm ml-9">
-              {reports.length} report{reports.length !== 1 && "s"} found
-            </p>
-          </div>
 
-          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 p-1 rounded-lg border border-gray-200 dark:border-gray-800 w-fit ml-9 md:ml-0">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-md transition-all ${
-                viewMode === "grid"
-                  ? "bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-sm"
-                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              }`}
-            >
-              <LayoutGrid size={18} />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-2 rounded-md transition-all ${
-                viewMode === "list"
-                  ? "bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-sm"
-                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              }`}
-            >
-              <ListIcon size={18} />
-            </button>
-          </div>
-        </header>
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-1.5 rounded-xl border border-white/20 w-fit">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-2.5 rounded-lg transition-all ${
+                  viewMode === "grid"
+                    ? "bg-white text-[#7ED957] shadow-md"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <LayoutGrid size={20} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2.5 rounded-lg transition-all ${
+                  viewMode === "list"
+                    ? "bg-white text-[#7ED957] shadow-md"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <ListIcon size={20} />
+              </button>
+            </div>
+          </header>
+        </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto p-4 md:p-10 space-y-6">
         {/* Content */}
         {error ? (
-          <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-xl text-red-600 dark:text-red-400 text-sm border border-red-100 dark:border-red-900/20">
+          <div className="bg-[#e07856]/10 p-4 rounded-xl text-[#c85a42] text-sm border-2 border-[#e07856]/30">
             {error}
           </div>
         ) : reports.length === 0 ? (
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-12 text-center border border-gray-100 dark:border-gray-800">
-            <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar className="text-gray-400" />
+          <div className="bg-white rounded-3xl p-16 text-center border border-gray-100 shadow-lg">
+            <div className="w-20 h-20 bg-[#7ED957]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Calendar className="text-[#7ED957]" size={32} />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-2xl font-bold text-gray-900">
               No history yet
             </h3>
-            <p className="text-gray-500 mt-2 max-w-sm mx-auto mb-6">
+            <p className="text-gray-500 mt-3 text-lg max-w-sm mx-auto mb-6">
               Your scan history will appear here. Start by analyzing a heritage
               site.
             </p>
             <Link
               href="/scan"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/20"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-[#7ED957] hover:bg-[#6DC54D] text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-105"
             >
               Start Scanning
             </Link>
@@ -193,25 +192,25 @@ export default function UserReportsPage() {
           <div
             className={
               viewMode === "grid"
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                : "space-y-3"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+                : "space-y-4"
             }
           >
             {reports.map((report) => (
               <Link
                 key={report.id}
-                href={`/reports/${report.id}`} // We'll create this route next
-                className={`group bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-orange-500 dark:hover:border-orange-500 transition-all shadow-sm hover:shadow-md flex ${
+                href={`/reports/${report.id}`}
+                className={`group bg-white rounded-2xl overflow-hidden border-2 border-gray-100 hover:border-[#7ED957] transition-all shadow-md hover:shadow-xl flex ${
                   viewMode === "list"
-                    ? "flex-row items-center p-3 gap-4"
+                    ? "flex-row items-center p-4 gap-5"
                     : "flex-col"
                 }`}
               >
                 {/* Thumbnail */}
                 <div
-                  className={`relative bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 ${
+                  className={`relative bg-gradient-to-br from-[#f5f5f5] to-[#fafafa] overflow-hidden shrink-0 ${
                     viewMode === "list"
-                      ? "w-20 h-20 rounded-lg"
+                      ? "w-24 h-24 rounded-xl"
                       : "w-full aspect-video"
                   }`}
                 >
@@ -219,16 +218,16 @@ export default function UserReportsPage() {
                     <img
                       src={report.imageUrl}
                       alt="Scan"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <AlertOctagon size={24} />
+                      <AlertOctagon size={28} />
                     </div>
                   )}
                   {viewMode === "grid" && (
-                    <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
-                      <Calendar size={10} />
+                    <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-medium">
+                      <Calendar size={12} />
                       {formatDistanceToNow(new Date(report.timestamp), {
                         addSuffix: true,
                       })}
@@ -238,16 +237,16 @@ export default function UserReportsPage() {
 
                 {/* Content */}
                 <div
-                  className={`flex-1 min-w-0 ${viewMode === "grid" ? "p-4" : ""}`}
+                  className={`flex-1 min-w-0 ${viewMode === "grid" ? "p-5" : ""}`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${getConditionColor(report.condition)}`}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide border-2 shadow-sm ${getConditionColor(report.condition)}`}
                     >
                       {report.condition}
                     </span>
                     {viewMode === "list" && (
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <span className="text-xs text-gray-500 flex items-center gap-1 font-medium">
                         <Calendar size={12} />
                         {formatDistanceToNow(new Date(report.timestamp), {
                           addSuffix: true,
@@ -256,26 +255,27 @@ export default function UserReportsPage() {
                     )}
                   </div>
 
-                  <h3 className="text-gray-900 dark:text-white font-medium line-clamp-1 mb-1 text-sm md:text-base">
+                  <h3 className="text-gray-900 font-semibold line-clamp-1 mb-1 text-base">
                     {report.comment || report.description || "Untitled Scan"}
                   </h3>
 
                   {report.comment && (
-                    <p className="text-xs text-gray-400 line-clamp-1 mb-2">
+                    <p className="text-xs text-gray-500 line-clamp-1 mb-2">
                       {report.description}
                     </p>
                   )}
 
-                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-auto pt-2">
-                    <span>
-                      {(report.confidence * 100).toFixed(0)}% confidence
+                  <div className="flex items-center gap-3 text-xs text-gray-600 font-medium mt-auto pt-2">
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#7ED957]"></span>
+                      {(report.confidence * 100).toFixed(0)}%
                     </span>
                     <span>•</span>
-                    <span className="uppercase">{report.provider || "AI"}</span>
+                    <span className="uppercase text-[#7ED957]">{report.provider || "AI"}</span>
                     {report.location && (
                       <>
                         <span>•</span>
-                        <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                        <span className="flex items-center gap-1 text-[#7ED957]">
                           <MapPin size={12} />
                           Location
                         </span>
@@ -285,8 +285,8 @@ export default function UserReportsPage() {
                 </div>
 
                 {viewMode === "list" && (
-                  <div className="pr-4 text-gray-400 group-hover:text-orange-500">
-                    <Eye size={20} />
+                  <div className="pr-4 text-gray-400 group-hover:text-[#7ED957] group-hover:scale-110 transition-all">
+                    <Eye size={22} />
                   </div>
                 )}
               </Link>
