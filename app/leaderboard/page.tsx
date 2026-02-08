@@ -62,7 +62,7 @@ export default function LeaderboardPage() {
       </motion.header>
 
       {/* Tab Navigation */}
-      <div className="bg-white border-b border-gray-200 px-4">
+      <div className="bg-white border-b border-gray-200">
         <div className="flex gap-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -94,7 +94,7 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-24 px-4 pt-4" style={{ background: 'var(--color-eggshell)' }}>
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pb-24 px-4 pt-4" style={{ background: 'var(--color-eggshell)' }}>
         <AnimatePresence mode="wait">
           {/* Leaderboard Tab */}
           {activeTab === 'leaderboard' && (
@@ -103,16 +103,16 @@ export default function LeaderboardPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="space-y-4"
+              className="w-full space-y-4"
             >
               {/* Podium - Top 3 */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100"
+                className="bg-white rounded-3xl shadow-sm p-4 border border-gray-100"
               >
-                <div className="flex items-end justify-center gap-2 mb-4">
+                <div className="flex items-end justify-center gap-1.5 mb-4">
                   {leaderboard.slice(0, 3).map((guardian, idx) => {
                     const positions = [1, 0, 2]; // Order: 2nd, 1st, 3rd
                     const actualIdx = positions[idx];
@@ -120,7 +120,7 @@ export default function LeaderboardPage() {
                     if (!entry) return null;
 
                     const heights = ['h-24', 'h-32', 'h-20'];
-                    const sizes = ['w-16 h-16', 'w-20 h-20', 'w-16 h-16'];
+                    const sizes = ['w-14 h-14', 'w-16 h-16', 'w-14 h-14'];
                     const badges = ['🥈', '🥇', '🥉'];
                     const gradients = [
                       'from-gray-300 to-gray-500',
@@ -134,19 +134,19 @@ export default function LeaderboardPage() {
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2 + idx * 0.1 }}
-                        className={`flex-1 text-center ${actualIdx === 0 ? '-mt-4' : ''}`}
+                        className={`flex-1 min-w-0 text-center ${actualIdx === 0 ? '-mt-4' : ''}`}
                       >
                         <motion.div
                           whileHover={{ scale: 1.1 }}
-                          className={`${sizes[idx]} mx-auto mb-2 bg-linear-to-br ${gradients[idx]} rounded-2xl flex items-center justify-center text-3xl shadow-lg ${actualIdx === 0 ? 'animate-pulse' : ''
+                          className={`${sizes[idx]} mx-auto mb-2 bg-linear-to-br ${gradients[idx]} rounded-2xl flex items-center justify-center text-2xl shadow-lg ${actualIdx === 0 ? 'animate-pulse' : ''
                             }`}
                         >
                           {badges[idx]}
                         </motion.div>
                         <div
-                          className={`bg-linear-to-br ${gradients[idx]} bg-opacity-10 rounded-xl p-3 ${heights[idx]} flex flex-col justify-end`}
+                          className={`bg-linear-to-br ${gradients[idx]} bg-opacity-10 rounded-xl p-2 ${heights[idx]} flex flex-col justify-end`}
                         >
-                          <p className="font-bold text-sm truncate text-gray-900">
+                          <p className="font-bold text-xs truncate text-gray-900">
                             {entry.userName || 'Anonymous'}
                           </p>
                           <p className="text-xs text-gray-600">{entry.points} pts</p>
@@ -233,7 +233,7 @@ export default function LeaderboardPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="space-y-4"
+              className="w-full space-y-4"
             >
               {/* Category Filter */}
               <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
@@ -319,6 +319,7 @@ export default function LeaderboardPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
+              className="w-full"
             >
               {stats ? (
                 <UserStatsCard stats={stats} rank={userRank > 0 ? userRank : undefined} />
