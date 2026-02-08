@@ -186,7 +186,7 @@ export default function Home() {
                 <h3 className="font-semibold mb-1" style={{ color: '#047857' }}>
                   Explore Map
                 </h3>
-                <p className="text-xs" style={{ color: 'var(--color-forest-dark)', opacity: 0.7 }}>
+                <p className="text-xs text-gray-800">
                   Find heritage sites nearby
                 </p>
               </motion.button>
@@ -207,7 +207,7 @@ export default function Home() {
                 <h3 className="font-semibold mb-1" style={{ color: 'var(--color-terracotta)' }}>
                   Scan Site
                 </h3>
-                <p className="text-xs" style={{ color: 'var(--color-forest-dark)', opacity: 0.7 }}>
+                <p className="text-xs text-gray-800">
                   AI-powered analysis
                 </p>
               </motion.button>
@@ -228,7 +228,7 @@ export default function Home() {
                 <h3 className="font-semibold mb-1" style={{ color: '#2563EB' }}>
                   My Reports
                 </h3>
-                <p className="text-xs" style={{ color: 'var(--color-forest-dark)', opacity: 0.7 }}>
+                <p className="text-xs text-gray-800">
                   View your contributions
                 </p>
               </motion.button>
@@ -248,7 +248,7 @@ export default function Home() {
                 <h3 className="font-semibold mb-1" style={{ color: '#D4A017' }}>
                   Leaderboard
                 </h3>
-                <p className="text-xs" style={{ color: 'var(--color-forest-dark)', opacity: 0.7 }}>
+                <p className="text-xs text-gray-800">
                   Top guardians
                 </p>
               </motion.button>

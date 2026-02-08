@@ -38,8 +38,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+
+      // Initialize user stats if this is a new user
+      if (user) {
+        try {
+          const { initializeUserStats } = await import('@/lib/achievements/firestore');
+          await initializeUserStats(user.uid, user.email || undefined);
+        } catch (error) {
+          console.error('Error initializing user stats:', error);
+        }
+      }
+
       setIsAdmin(user ? ADMIN_EMAILS.includes(user.email || "") : false);
       setLoading(false);
     });

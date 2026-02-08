@@ -7,6 +7,8 @@ import {
   AlertOctagon,
   Info,
   ChevronRight,
+  MapPin,
+  Clock,
 } from "lucide-react";
 import { AnalysisResult } from "@/lib/ai/types";
 import { LocationCapture } from "./LocationCapture";
@@ -33,7 +35,10 @@ export function AnalysisResultOverlay({
   // Default to true for backward compatibility with old reports
   if (result.isRelevant === false) {
     return (
-      <RejectionOverlay reason={result.rejectionReason} onRetake={onClose} />
+      <RejectionOverlay
+        reason={result.rejectionReason ?? "This image does not appear to contain heritage-related content."}
+        onRetake={onClose}
+      />
     );
   }
 
@@ -52,17 +57,17 @@ export function AnalysisResultOverlay({
   const getConditionColor = (condition: string) => {
     switch (condition.toLowerCase()) {
       case "excellent":
-        return "bg-emerald-500";
+        return "from-emerald-400 to-emerald-600";
       case "good":
-        return "bg-green-500";
+        return "from-green-400 to-green-600";
       case "fair":
-        return "bg-yellow-500";
+        return "from-yellow-400 to-yellow-600";
       case "poor":
-        return "bg-orange-500";
+        return "from-orange-400 to-orange-600";
       case "critical":
-        return "bg-red-500";
+        return "from-red-400 to-red-600";
       default:
-        return "bg-gray-500";
+        return "from-gray-400 to-gray-600";
     }
   };
 
@@ -123,167 +128,212 @@ export function AnalysisResultOverlay({
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="absolute inset-0 z-50 bg-white dark:bg-gray-900 rounded-t-3xl overflow-y-auto"
+      className="absolute inset-0 z-50 rounded-t-3xl overflow-hidden flex flex-col"
+      style={{ background: 'var(--color-eggshell)' }}
     >
-      {/* Header Image/Gradient */}
-      <div className={`relative h-48 ${getConditionColor(result.condition)}`}>
-        <div className="absolute inset-0 bg-black/20" />
-
-        {/* Show image if available */}
+      {/* Header with Gradient */}
+      <motion.header
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="px-6 py-4 text-white relative overflow-hidden"
+        style={{ background: 'var(--gradient-primary)' }}
+      >
+        {/* Background Image */}
         {imageUrl && (
-          <img
-            src={imageUrl}
-            alt="Analyzed Site"
-            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
-          />
+          <div className="absolute inset-0 opacity-20">
+            <img
+              src={imageUrl}
+              alt="Analyzed Site"
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
 
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/30 backdrop-blur-md rounded-full text-white transition-colors z-10"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="absolute -bottom-8 left-6 z-10">
-          <div
-            className={`w-16 h-16 rounded-2xl shadow-xl flex items-center justify-center ${getConditionColor(result.condition)} border-4 border-white dark:border-gray-900`}
-          >
-            {getConditionIcon(result.condition)}
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="pt-10 px-6 pb-32 space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white capitalize">
-            {result.condition} Condition
-          </h2>
-          <div className="flex items-center gap-2 mt-1">
-            <div className="h-1.5 w-24 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className={`h-full ${getConditionColor(result.condition)}`}
-                style={{ width: `${result.confidence * 100}%` }}
-              />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className={`w-12 h-12 bg-linear-to-br ${getConditionColor(result.condition)} rounded-2xl flex items-center justify-center shadow-lg`}
+            >
+              {getConditionIcon(result.condition)}
+            </motion.div>
+            <div>
+              <h1 className="text-2xl font-semibold capitalize">
+                {result.condition} Condition
+              </h1>
+              <p className="text-sm text-white/90">
+                {Math.round(result.confidence * 100)}% Confidence
+              </p>
             </div>
-            <span className="text-xs text-gray-500 font-medium">
-              {Math.round(result.confidence * 100)}% Confidence
-            </span>
           </div>
-        </div>
 
-        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-          {result.description}
-        </p>
+          <button
+            onClick={onClose}
+            className="p-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl text-white transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      </motion.header>
+
+      {/* Main Content - Scrollable */}
+      <main className="flex-1 overflow-y-auto px-4 pt-4 pb-6 space-y-4">
+        {/* Description Card */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+        >
+          <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-2">
+            Analysis Summary
+          </h3>
+          <p className="text-gray-700 leading-relaxed text-sm">
+            {result.description}
+          </p>
+        </motion.div>
 
         {/* Issues List */}
         {result.issues && result.issues.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+          >
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3">
               Identified Issues
             </h3>
             <div className="space-y-2">
               {result.issues.map((issue, idx) => (
                 <div
                   key={idx}
-                  className="flex items-start gap-3 p-3 bg-red-50 dark:bg-red-500/10 rounded-xl"
+                  className="flex items-start gap-3 p-3 bg-red-50 rounded-xl border border-red-100"
                 >
                   <AlertTriangle
                     size={18}
                     className="text-red-500 mt-0.5 shrink-0"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-200">
-                    {issue}
-                  </span>
+                  <span className="text-sm text-gray-700">{issue}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Recommendations */}
         {result.recommendations && result.recommendations.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+          >
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3">
               Recommendations
             </h3>
             <div className="space-y-2">
               {result.recommendations.map((rec, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-100 dark:border-blue-500/20"
+                  className="flex items-start gap-3 p-3 rounded-xl border"
+                  style={{
+                    background: 'rgba(126, 217, 87, 0.1)',
+                    borderColor: 'rgba(126, 217, 87, 0.2)'
+                  }}
                 >
-                  <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center shrink-0">
-                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: 'rgba(126, 217, 87, 0.2)' }}
+                  >
+                    <span className="text-xs font-bold" style={{ color: 'var(--color-forest)' }}>
                       {idx + 1}
                     </span>
                   </div>
-                  <span className="text-sm text-gray-700 dark:text-gray-200">
-                    {rec}
-                  </span>
+                  <span className="text-sm text-gray-700">{rec}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {/* Comment & Submit Section */}
-        <div className="pt-6 border-t border-gray-100 dark:border-gray-800 space-y-4">
-          {/* Location Capture */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {/* Location Capture */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin size={16} style={{ color: 'var(--color-forest)' }} />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400">
               Location
-            </label>
-            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-              <LocationCapture
-                autoCapture={true}
-                onLocationCaptured={setLocation}
-                onError={(error) =>
-                  console.warn("Location capture failed:", error)
-                }
-              />
-            </div>
+            </h3>
           </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Add Inspector's Note
-            </label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Enter specific observations or location details..."
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all text-sm min-h-[100px]"
-              disabled={isSubmitting || isSaved}
+          <div className="px-4 py-3 rounded-xl" style={{ background: 'var(--color-eggshell)' }}>
+            <LocationCapture
+              autoCapture={true}
+              onLocationCaptured={setLocation}
+              onError={(error) =>
+                console.warn("Location capture failed:", error)
+              }
             />
           </div>
+        </motion.div>
 
-          <button
-            onClick={handleSubmit}
+        {/* Comment Section */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+        >
+          <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3">
+            Inspector's Note
+          </h3>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Enter specific observations or location details..."
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-forest outline-none transition-all text-sm min-h-[100px] resize-none"
+            style={{
+              background: 'var(--color-eggshell)'
+            }}
             disabled={isSubmitting || isSaved}
-            className={`w-full py-4 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 transition-all ${
-              isSaved
-                ? "bg-green-500"
-                : "bg-black dark:bg-white dark:text-black hover:opacity-90 active:scale-[0.98]"
+          />
+        </motion.div>
+
+        {/* Submit Button */}
+        <motion.button
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleSubmit}
+          disabled={isSubmitting || isSaved}
+          className={`w-full py-4 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 transition-all ${isSaved
+            ? "bg-green-500"
+            : ""
             } disabled:opacity-70 disabled:cursor-not-allowed`}
-          >
-            {isSubmitting ? (
-              <>Saving Report...</>
-            ) : isSaved ? (
-              <>
-                <CheckCircle size={20} />
-                Saved Successfully
-              </>
-            ) : (
-              <>
-                Submit Report via {provider || "AI"}
-                <ChevronRight size={18} />
-              </>
-            )}
-          </button>
-        </div>
-      </div>
+          style={!isSaved ? { background: 'var(--gradient-primary)' } : {}}
+        >
+          {isSubmitting ? (
+            <>Saving Report...</>
+          ) : isSaved ? (
+            <>
+              <CheckCircle size={20} />
+              Saved Successfully
+            </>
+          ) : (
+            <>
+              Submit Report via {provider || "AI"}
+              <ChevronRight size={18} />
+            </>
+          )}
+        </motion.button>
+      </main>
     </motion.div>
   );
 }
